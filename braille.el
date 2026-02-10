@@ -1,0 +1,84 @@
+;;; braille.el Braille drawing mode
+;; 2026-02-10 07:04
+;; left click to draw
+;; right click to erase (TBD)
+
+(defconst braille-dot-values
+  '(#b00000001 #b00000010 #b00000100 #b00001000 #b00010000
+               #b00100000 #b01000000 #b10000000))
+(defconst braille-base #x2800)
+(defconst braille-nrows 4)
+
+(defun braille-create-canvas-at-point (size)
+  (interactive (list (split-string (read-string "Canvas size: " "40x10") "x")))
+  (unless (= (length size) 2)
+    (user-error "Expected canvas size format: WxH (ex. 40x10)"))
+  (let ((h (string-to-number (cadr size)))
+        (w (string-to-number (car size))))
+    (dotimes (i h)
+      (insert (concat (make-string w ? ) "\n")))))
+
+(defun braille-colrow-from-rel-xy (rel-xy)
+  "Calculate col and row of appropriate braille point from relative position.
+col = 0/1. row = 0/1/2/3."
+  (let* ((rel-x (car rel-xy))
+         (rel-y (cdr rel-xy))
+         (char-w (frame-char-width))
+         (char-h (frame-char-height))
+         (col (if (< rel-x (/ char-w 2)) 0 1))
+         (row (floor (* braille-nrows (/ (float rel-y) char-h)))))
+    (cons col row)))
+
+(defun braille-dot-index-from-colrow (colrow)
+  "Flatten rowcol to braille dot index 0-7"
+  ;; y*n + x
+  (+ (* (car colrow) braille-nrows) (cdr colrow)))
+
+(defun braille-click-debug (e)
+  "Show information about the click position for debugging purposes.
+E should be a mouse click event."
+  (interactive "e")
+  (let* ((pos-info (event-start e))
+         (char-pos (posn-point pos-info))
+         (rel-xy (posn-object-x-y pos-info))
+         (click-xy (posn-x-y pos-info))
+         (colrow (braille-colrow-from-rel-xy rel-xy))
+         (index (braille-dot-index-from-colrow colrow)))
+    (message "pos-info:%s char-pos:%d rel-xy:%s click-xy:%s colrow:%s index:%s"
+             pos-info char-pos rel-xy click-xy colrow index)))
+
+(defun braille-char-p (char)
+  "If CHAR is a braille character return its delta, otherwise return nil."
+  (let ((delta (- char braille-base)))
+    (if (and (> delta 0) (< delta 256))
+        delta)))
+
+(defun braille-dot-index-from-pos-info (pos-info)
+  (braille-dot-index-from-colrow
+   (braille-colrow-from-rel-xy (posn-object-x-y pos-info))))
+
+(defun braille-click (e)
+  "E should be a mouse click event."
+  (interactive "e")
+  (let* ((pos-info (event-start e))
+         (char-pos (posn-point pos-info))
+         (dot-index (braille-dot-index-from-pos-info pos-info)))
+    (unless (>= char-pos (point-max))
+      (goto-char char-pos)
+      (let* ((char (char-after))
+             (d (braille-char-p char))
+             (dot-value-clicked (nth dot-index braille-dot-values))
+             (new-dot-value
+              (if d (logior d dot-value-clicked) dot-value-clicked)))
+        (delete-char 1)
+        (insert (+ #x2800 new-dot-value))))))
+
+;; temp debug
+;; (global-set-key [mouse-8] 'braille-click)
+;; (global-set-key [down-mouse-8] 'ignore)
+;; (setq debug-on-error t)
+;; (setq debug-on-error nil)
+
+(provide 'braille)
+
+;;; braille.el ends here
