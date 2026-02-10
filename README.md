@@ -2,7 +2,11 @@
 Emacs minor mode for drawing with braille characters
 with the mouse
 
-WIP. So far there is the functionality to click and a dot is added to the braille character grid according to where in the character the click occurred.
+Work in progress
+
+Implemented:
+- [x] Add dot to braille character grid according to where in the character the click occurred
+- [x] Mouse drag draw
 
 ## Resources that helped me
 - [Emacs.SE: How to access mouse event coordinates? (conveniently)](https://emacs.stackexchange.com/questions/51596/how-to-access-mouse-event-coordinates-conveniently) 2019 question by ideasman42, answer by wasamasa

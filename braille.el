@@ -85,11 +85,21 @@ E should be a mouse click event."
           (delete-char 1)
           (insert (+ #x2800 new-dot-value)))))))
 
+(defun braille-mouse-draw (e)
+  "E should be a mouse down event."
+  (interactive "e")
+  (track-mouse
+    (braille-click e)                   ; first click
+    ;; (message "out %S" event)
+    (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
+      ;; (message "in %S" e)
+      (braille-click e))))
+
 ;; temp debug
-;; (global-set-key [mouse-8] 'braille-click)
-;; (global-set-key [down-mouse-8] 'ignore)
-;; (setq debug-on-error t)
-;; (setq debug-on-error nil)
+;; (global-set-key [down-mouse-1] 'braille-mouse-draw)
+;; (global-unset-key [mouse-1])
+
+;; (define-key braille-mode-map [down-mouse-1] #'braille-mouse-draw)
 
 (provide 'braille)
 
