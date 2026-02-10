@@ -73,15 +73,17 @@ E should be a mouse click event."
   (interactive "e")
   (let* ((pos-info (event-start e))
          (char-pos (posn-point pos-info))
-         (dot-bit (braille-bit-from-pos-info pos-info)))
+         (dot-bit (braille-bit-from-pos-info pos-info))
+         (inhibit-modification-hooks t)) ; FIXME: potentially problematic
     (unless (>= char-pos (point-max))
-      (goto-char char-pos)
-      (let* ((char (char-after))
-             (d (braille-char-p char))
-             (new-dot-value
-              (if d (logior d dot-bit) dot-bit)))
-        (delete-char 1)
-        (insert (+ #x2800 new-dot-value))))))
+      (save-excursion
+        (goto-char char-pos)
+        (let* ((char (char-after))
+               (d (braille-char-p char))
+               (new-dot-value
+                (if d (logior d dot-bit) dot-bit)))
+          (delete-char 1)
+          (insert (+ #x2800 new-dot-value)))))))
 
 ;; temp debug
 ;; (global-set-key [mouse-8] 'braille-click)
