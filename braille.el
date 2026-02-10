@@ -3,9 +3,6 @@
 ;; left click to draw
 ;; right click to erase (TBD)
 
-(defconst braille-dot-values
-  '(#b00000001 #b00000010 #b00000100 #b00001000 #b00010000
-               #b00100000 #b01000000 #b10000000))
 (defconst braille-base #x2800)
 (defconst braille-nrows 4)
 
@@ -29,10 +26,22 @@ col = 0/1. row = 0/1/2/3."
          (row (floor (* braille-nrows (/ (float rel-y) char-h)))))
     (cons col row)))
 
-(defun braille-dot-index-from-colrow (colrow)
-  "Flatten rowcol to braille dot index 0-7"
-  ;; y*n + x
-  (+ (* (car colrow) braille-nrows) (cdr colrow)))
+(defun braille-bit-from-colrow (colrow)
+  ;; unfortunately this can't be a simple data structure because
+  ;; the order in braille is 1237 4568
+  (let ((col (car colrow))
+        (row (cdr colrow)))
+    (cond
+     ;; left
+     ((and (= col 0) (= row 0)) #b00000001)
+     ((and (= col 0) (= row 1)) #b00000010)
+     ((and (= col 0) (= row 2)) #b00000100)
+     ((and (= col 0) (= row 3)) #b01000000)
+     ;; right
+     ((and (= col 1) (= row 0)) #b00001000)
+     ((and (= col 1) (= row 1)) #b00010000)
+     ((and (= col 1) (= row 2)) #b00100000)
+     ((and (= col 1) (= row 3)) #b10000000))))
 
 (defun braille-click-debug (e)
   "Show information about the click position for debugging purposes.
@@ -43,18 +52,20 @@ E should be a mouse click event."
          (rel-xy (posn-object-x-y pos-info))
          (click-xy (posn-x-y pos-info))
          (colrow (braille-colrow-from-rel-xy rel-xy))
-         (index (braille-dot-index-from-colrow colrow)))
-    (message "pos-info:%s char-pos:%d rel-xy:%s click-xy:%s colrow:%s index:%s"
-             pos-info char-pos rel-xy click-xy colrow index)))
+         (bit (braille-bit-from-colrow colrow)))
+    (message "pos-info:%s char-pos:%d rel-xy:%s click-xy:%s colrow:%s bit:%s"
+             pos-info char-pos rel-xy click-xy colrow bit)))
 
 (defun braille-char-p (char)
   "If CHAR is a braille character return its delta, otherwise return nil."
   (let ((delta (- char braille-base)))
+    ;; empty braille character (delta==0) intentionally omitted
+    ;; (i prefer to just have space but maybe it could be configurable)
     (if (and (> delta 0) (< delta 256))
         delta)))
 
-(defun braille-dot-index-from-pos-info (pos-info)
-  (braille-dot-index-from-colrow
+(defun braille-bit-from-pos-info (pos-info)
+  (braille-bit-from-colrow
    (braille-colrow-from-rel-xy (posn-object-x-y pos-info))))
 
 (defun braille-click (e)
@@ -62,14 +73,13 @@ E should be a mouse click event."
   (interactive "e")
   (let* ((pos-info (event-start e))
          (char-pos (posn-point pos-info))
-         (dot-index (braille-dot-index-from-pos-info pos-info)))
+         (dot-bit (braille-bit-from-pos-info pos-info)))
     (unless (>= char-pos (point-max))
       (goto-char char-pos)
       (let* ((char (char-after))
              (d (braille-char-p char))
-             (dot-value-clicked (nth dot-index braille-dot-values))
              (new-dot-value
-              (if d (logior d dot-value-clicked) dot-value-clicked)))
+              (if d (logior d dot-bit) dot-bit)))
         (delete-char 1)
         (insert (+ #x2800 new-dot-value))))))
 
