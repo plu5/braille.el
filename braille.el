@@ -3,10 +3,11 @@
 ;; left click to draw
 ;; right click to erase (TBD)
 
-(defconst braille-base #x2800)
-(defconst braille-nrows 4)
+(defconst braille-base #x2800 "Start of unicode braille block")
+(defconst braille-nrows 4 "Number of rows in the braille grid")
 
 (defun braille-create-canvas-at-point (size)
+  "Create an area of whitespace with given dimensions."
   (interactive (list (split-string (read-string "Canvas size: " "40x10") "x")))
   (unless (= (length size) 2)
     (user-error "Expected canvas size format: WxH (ex. 40x10)"))
@@ -27,6 +28,8 @@ col = 0/1. row = 0/1/2/3."
     (cons col row)))
 
 (defun braille-bit-from-colrow (colrow)
+  "Get braille dot bit at COLROW.
+COLROW is (col . row) for the dot position in the 2x4 braille grid, 0-based."
   ;; unfortunately this can't be a simple data structure because
   ;; the order in braille is 1237 4568
   (let ((col (car colrow))
@@ -65,11 +68,15 @@ E should be a mouse click event."
         delta)))
 
 (defun braille-bit-from-pos-info (pos-info)
+  "Get bit for appropriate dot given mouse event event-start information."
   (braille-bit-from-colrow
    (braille-colrow-from-rel-xy (posn-object-x-y pos-info))))
 
 (defun braille-click (e)
-  "E should be a mouse click event."
+  "Place braille dot at appropriate position based on mouse location.
+Placing the first dot or adding it to the existing dots if character under
+point is a braille character.
+E should be a mouse click event."
   (interactive "e")
   (let* ((pos-info (event-start e))
          (char-pos (posn-point pos-info))
@@ -86,7 +93,8 @@ E should be a mouse click event."
           (insert (+ #x2800 new-dot-value)))))))
 
 (defun braille-mouse-draw (e)
-  "E should be a mouse down event."
+  "Draw braille after click while mouse is dragged, stopping when it is let go.
+E should be a mouse down event."
   (interactive "e")
   (track-mouse
     (braille-click e)                   ; first click
