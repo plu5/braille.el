@@ -1,6 +1,6 @@
 # braille.el
 Emacs minor mode for drawing with braille characters
-with the mouse
+using a mouse or drawing tablet
 
 Work in progress
 
