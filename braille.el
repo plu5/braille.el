@@ -3,6 +3,11 @@
 ;; left click to draw
 ;; right click to erase (TBD)
 
+(defcustom braille-interpolation-precision 3
+  "Larger number is less precise, with max precision at 1. This is the
+number dy or dx get divided by to get the number of steps for the
+interpolation.")
+
 (defconst braille-base #x2800 "Start of unicode braille block")
 (defconst braille-nrows 4 "Number of rows in the braille grid")
 
@@ -135,10 +140,10 @@ E should be a mouse down event."
       (setq xy1 (posn-x-y pos-info))    ; end xy
       (setq dx (- (car xy1) (car xy0)))
       (setq dy (- (cdr xy1) (cdr xy0)))
-      ;; abs because dx and dy can be negative. maybe should also
-      ;; divide by something as it results in more steps than
-      ;; necessary
-      (setq steps (max (abs dx) (abs dy)))
+      ;; NOTES: (1) abs because dx and dy can be negative
+      ;;        (2) results in more steps than necessary
+      (setq steps (abs (/ (max (abs dx) (abs dy))
+                          braille-interpolation-precision)))
       ;; (message "dx:%s dy:%s steps:%s" dx dy steps)
       (if (= steps 0)
           (braille-insert-at-xy xy0)    ; a dot
