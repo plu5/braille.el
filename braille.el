@@ -140,15 +140,17 @@ E should be a mouse down event."
       ;; necessary
       (setq steps (max (abs dx) (abs dy)))
       ;; (message "dx:%s dy:%s steps:%s" dx dy steps)
-      (dotimes (i (1+ steps))
-        ;; x0 + dx * i/steps. and must change one to float to avoid
-        ;; rounding the i/steps, then round final result because
-        ;; posn-point must be whole number
-        (let* ((x (round (+ (car xy0) (* dx (/ (float i) steps)))))
-               (y (round (+ (cdr xy0) (* dy (/ (float i) steps)))))
-               (xy (cons x y)))
-          ;; (message "i:%s x:%s y:%s" i x y)
-          (braille-insert-at-xy xy))))))
+      (if (= steps 0)
+          (braille-insert-at-xy xy0)    ; a dot
+        (dotimes (i (1+ steps))         ; a line
+          ;; x0 + dx * i/steps. and must change one to float to avoid
+          ;; rounding the i/steps, then round final result because
+          ;; posn-point must be whole number
+          (let* ((x (round (+ (car xy0) (* dx (/ (float i) steps)))))
+                 (y (round (+ (cdr xy0) (* dy (/ (float i) steps)))))
+                 (xy (cons x y)))
+            ;; (message "i:%s x:%s y:%s" i x y)
+            (braille-insert-at-xy xy)))))))
 
 ;; temp debug
 ;; (global-set-key [down-mouse-1] #'braille-mouse-draw)
