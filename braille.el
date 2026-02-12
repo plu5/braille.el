@@ -102,17 +102,6 @@ E should be a mouse click event."
   (interactive "e")
   (braille-insert-at-xy (posn-x-y (event-start e))))
 
-(defun braille-mouse-draw (e)
-  "Draw braille after click while mouse is dragged, stopping when it is let go.
-E should be a mouse down event."
-  (interactive "e")
-  (track-mouse
-    (braille-click e)                   ; first click
-    ;; (message "out %S" event)
-    (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
-      ;; (message "in %S" e)
-      (braille-click e))))
-
 (defun braille-pos-info-debug (pos-info &optional text)
   "Show message with information from POS-INFO.
 POS-INFO is the return from `event-start' or `event-end'."
@@ -125,44 +114,62 @@ POS-INFO is the return from `event-start' or `event-end'."
              (or text "braille-pos-info-debug") char-pos click-xy
              (posn-x-y char-pos-info) char-pos-info pos-info)))
 
-(defun braille-line (e)
+(defun braille-line (xy0 xy1)
+  "Draw a line of braille points from XY0 to XY1.
+XY0 and XY1 should each be a position in pixels like (x . y)"
+  (let (dx dy steps)
+    (setq dx (- (car xy1) (car xy0)))
+    (setq dy (- (cdr xy1) (cdr xy0)))
+    ;; NOTES: (1) abs because dx and dy can be negative
+    ;;        (2) results in more steps than necessary
+    (setq steps (abs (/ (max (abs dx) (abs dy))
+                        braille-interpolation-precision)))
+    ;; (message "dx:%s dy:%s steps:%s" dx dy steps)  ; debug
+    (if (= steps 0)
+        (braille-insert-at-xy xy0)      ; a dot
+      (dotimes (i (1+ steps))           ; a line
+        ;; x0 + dx * i/steps. and must change one to float to avoid
+        ;; rounding the i/steps, then round final result because
+        ;; posn-point must be whole number
+        (let* ((x (round (+ (car xy0) (* dx (/ (float i) steps)))))
+               (y (round (+ (cdr xy0) (* dy (/ (float i) steps)))))
+               (xy (cons x y)))
+          ;; (message "i:%s x:%s y:%s" i x y)  ; debug
+          (braille-insert-at-xy xy))))))
+
+(defun braille-draw-line (e)
   "Draw a line of braille points.
 Interpolates a line from position mouse is pressed to position it is let go.
 E should be a mouse down event."
   (interactive "e")
   (track-mouse
-    (let (pos-info xy0 xy1 dx dy steps)
-      (setq pos-info (event-start e))
-      (setq xy0 (posn-x-y pos-info))    ; start xy
+    (let (xy0 xy1)
+      (setq xy0 (posn-x-y (event-start e))) ; start xy
       (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
         (ignore))
-      (setq pos-info (event-end e))
-      (setq xy1 (posn-x-y pos-info))    ; end xy
-      (setq dx (- (car xy1) (car xy0)))
-      (setq dy (- (cdr xy1) (cdr xy0)))
-      ;; NOTES: (1) abs because dx and dy can be negative
-      ;;        (2) results in more steps than necessary
-      (setq steps (abs (/ (max (abs dx) (abs dy))
-                          braille-interpolation-precision)))
-      ;; (message "dx:%s dy:%s steps:%s" dx dy steps)
-      (if (= steps 0)
-          (braille-insert-at-xy xy0)    ; a dot
-        (dotimes (i (1+ steps))         ; a line
-          ;; x0 + dx * i/steps. and must change one to float to avoid
-          ;; rounding the i/steps, then round final result because
-          ;; posn-point must be whole number
-          (let* ((x (round (+ (car xy0) (* dx (/ (float i) steps)))))
-                 (y (round (+ (cdr xy0) (* dy (/ (float i) steps)))))
-                 (xy (cons x y)))
-            ;; (message "i:%s x:%s y:%s" i x y)
-            (braille-insert-at-xy xy)))))))
+      (setq xy1 (posn-x-y (event-end e))) ; end xy
+      (braille-line xy0 xy1))))
+
+(defun braille-mouse-draw (e)
+  "Draw braille after click while mouse is dragged, stopping when it is let go.
+E should be a mouse down event."
+  (interactive "e")
+  (let ((xy-prev (posn-x-y (event-start e)))
+        xy-cur)
+    (braille-insert-at-xy xy-prev)      ; first click
+    (track-mouse
+      (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
+        (setq xy-cur (posn-x-y (event-start e)))
+        (unless (eq xy-cur xy-prev)
+          (braille-line xy-prev xy-cur))
+        (setq xy-prev xy-cur)))))
 
 ;; temp debug
 ;; (global-set-key [down-mouse-1] #'braille-mouse-draw)
 ;; (global-unset-key [mouse-1])
 ;; (global-set-key [mouse-8] #'braille-click-debug)
 ;; (global-set-key [mouse-8] #'braille-click)
-;; (global-set-key [down-mouse-1] #'braille-line)
+;; (global-set-key [down-mouse-1] #'braille-draw-line)
 
 ;; (define-key braille-mode-map [down-mouse-1] #'braille-mouse-draw)
 

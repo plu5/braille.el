@@ -8,9 +8,9 @@ Implemented:
 - [x] Add dot to braille character grid according to where in the character the click occurred
 - [x] Mouse drag draw
 - [x] Draw line
+- [x] Interpolation / Don't skip when drawing quickly
 
 TBD:
-- [ ] Interpolation / Don't skip when drawing quickly
 - [ ] Don't do the deletion/insertion if clicked outside of "canvas"
 - [ ] Right mouse erase
 - [ ] Minor mode
