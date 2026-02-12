@@ -7,12 +7,20 @@ Work in progress
 Implemented:
 - [x] Add dot to braille character grid according to where in the character the click occurred
 - [x] Mouse drag draw
+- [x] Draw line
 
 TBD:
-- [ ] Don't skip when drawing quickly
+- [ ] Interpolation / Don't skip when drawing quickly
 - [ ] Don't do the deletion/insertion if clicked outside of "canvas"
 - [ ] Right mouse erase
 - [ ] Minor mode
+- [ ] Draw rectangle
+- [ ] Draw ellipse
+
+Maybe:
+- [ ] Create a font where the braille dots are blocks for better visibility
+- [ ] Draw speech bubble (ASCII)
+- [ ] Animation
 
 ## Usage
 - Turn on minor mode; this will take over some of your keys, like left mouse

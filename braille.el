@@ -72,13 +72,13 @@ E should be a mouse click event."
   (braille-bit-from-colrow
    (braille-colrow-from-rel-xy (posn-object-x-y pos-info))))
 
-(defun braille-click (e)
-  "Place braille dot at appropriate position based on mouse location.
-Placing the first dot or adding it to the existing dots if character under
+(defun braille-insert-at-xy (xy)
+  "Place braille dot at appropriate position based on pixel coordinates XY.
+Places the first dot or Adds it to the existing dots if character under
 point is a braille character.
-E should be a mouse click event."
-  (interactive "e")
-  (let* ((pos-info (event-start e))
+XY should be (x . y) where x and y are pixel coordinates."
+  (message "xy:%s" xy)
+  (let* ((pos-info (posn-at-x-y (car xy) (cdr xy)))
          (char-pos (posn-point pos-info))
          (dot-bit (braille-bit-from-pos-info pos-info))
          (inhibit-modification-hooks t)) ; FIXME: potentially problematic
@@ -92,6 +92,12 @@ E should be a mouse click event."
           (delete-char 1)
           (insert (+ #x2800 new-dot-value)))))))
 
+(defun braille-click (e)
+  "Place braille dot at appropriate position based on mouse location.
+E should be a mouse click event."
+  (interactive "e")
+  (braille-insert-at-xy (posn-x-y (event-start e))))
+
 (defun braille-mouse-draw (e)
   "Draw braille after click while mouse is dragged, stopping when it is let go.
 E should be a mouse down event."
@@ -103,9 +109,54 @@ E should be a mouse down event."
       ;; (message "in %S" e)
       (braille-click e))))
 
+(defun braille-pos-info-debug (pos-info &optional text)
+  "Show message with information from POS-INFO.
+POS-INFO is the return from `event-start' or `event-end'."
+  (let (char-pos click-xy char-pos-info)
+    (setq char-pos (posn-point pos-info))
+    (setq click-xy (posn-x-y pos-info))
+    (setq char-pos-info (posn-at-x-y (car click-xy) (cdr click-xy)))
+    (message "%s char-pos:%s | click-xy:%s |\
+ char-pos-xy:%s | pos-info:%s | char-pos-info:%s"
+             (or text "braille-pos-info-debug") char-pos click-xy
+             (posn-x-y char-pos-info) char-pos-info pos-info)))
+
+(defun braille-line (e)
+  "Draw a line of braille points.
+Interpolates a line from position mouse is pressed to position it is let go.
+E should be a mouse down event."
+  (interactive "e")
+  (track-mouse
+    (let (pos-info xy0 xy1 dx dy steps)
+      (setq pos-info (event-start e))
+      (setq xy0 (posn-x-y pos-info))    ; start xy
+      (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
+        (ignore))
+      (setq pos-info (event-end e))
+      (setq xy1 (posn-x-y pos-info))    ; end xy
+      (setq dx (- (car xy1) (car xy0)))
+      (setq dy (- (cdr xy1) (cdr xy0)))
+      ;; abs because dx and dy can be negative. maybe should also
+      ;; divide by something as it results in more steps than
+      ;; necessary
+      (setq steps (max (abs dx) (abs dy)))
+      ;; (message "dx:%s dy:%s steps:%s" dx dy steps)
+      (dotimes (i (1+ steps))
+        ;; x0 + dx * i/steps. and must change one to float to avoid
+        ;; rounding the i/steps, then round final result because
+        ;; posn-point must be whole number
+        (let* ((x (round (+ (car xy0) (* dx (/ (float i) steps)))))
+               (y (round (+ (cdr xy0) (* dy (/ (float i) steps)))))
+               (xy (cons x y)))
+          ;; (message "i:%s x:%s y:%s" i x y)
+          (braille-insert-at-xy xy))))))
+
 ;; temp debug
-;; (global-set-key [down-mouse-1] 'braille-mouse-draw)
+;; (global-set-key [down-mouse-1] #'braille-mouse-draw)
 ;; (global-unset-key [mouse-1])
+;; (global-set-key [mouse-8] #'braille-click-debug)
+;; (global-set-key [mouse-8] #'braille-click)
+;; (global-set-key [down-mouse-1] #'braille-line)
 
 ;; (define-key braille-mode-map [down-mouse-1] #'braille-mouse-draw)
 
