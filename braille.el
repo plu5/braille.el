@@ -77,7 +77,6 @@ E should be a mouse click event."
 Places the first dot or Adds it to the existing dots if character under
 point is a braille character.
 XY should be (x . y) where x and y are pixel coordinates."
-  (message "xy:%s" xy)
   (let* ((pos-info (posn-at-x-y (car xy) (cdr xy)))
          (char-pos (posn-point pos-info))
          (dot-bit (braille-bit-from-pos-info pos-info))
