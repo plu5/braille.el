@@ -17,15 +17,17 @@
     (dotimes (i h)
       (insert (concat (make-string w ? ) "\n")))))
 
-(defun braille-colrow-from-rel-xy (rel-xy)
-  "Calculate col and row of appropriate braille point from relative position.
+(defun braille-colrow-from-pos-info (pos-info)
+    "Calculate col and row of appropriate braille point from posn.
 col = 0/1. row = 0/1/2/3."
-  (let* ((rel-x (car rel-xy))
-         (rel-y (cdr rel-xy))
-         (char-w (window-font-width))
-         (char-h (window-font-height))
-         (col (if (< rel-x (/ char-w 2)) 0 1))
-         (row (floor (* braille-nrows (/ (float rel-y) char-h)))))
+  (let* ((rel-xy (posn-object-x-y pos-info))
+         (rel-wh (posn-object-width-height pos-info))
+         (col (min (1- braille-ncols)
+                   ;; x / w / ncols
+                   (/ (car rel-xy) (/ (car rel-wh) braille-ncols))))
+         (row (min (1- braille-nrows)
+                   ;; y / h / nrows
+                   (/ (cdr rel-xy) (/ (cdr rel-wh) braille-nrows)))))
     (cons col row)))
 
 (defun braille-bit-from-colrow (colrow)
@@ -55,7 +57,7 @@ E should be a mouse click event."
          (char-pos (posn-point pos-info))
          (rel-xy (posn-object-x-y pos-info))
          (click-xy (posn-x-y pos-info))
-         (colrow (braille-colrow-from-rel-xy rel-xy))
+         (colrow (braille-colrow-from-pos-info pos-info))
          (bit (braille-bit-from-colrow colrow))
          (char-pos-info (posn-at-point char-pos)))
     (message
@@ -77,7 +79,7 @@ p:%s s:%s"
 (defun braille-bit-from-pos-info (pos-info)
   "Get bit for appropriate dot given mouse event event-start information."
   (braille-bit-from-colrow
-   (braille-colrow-from-rel-xy (posn-object-x-y pos-info))))
+   (braille-colrow-from-pos-info pos-info)))
 
 (defun braille-insert-at-xy (xy)
   "Place braille dot at appropriate position based on pixel coordinates XY.
@@ -118,15 +120,15 @@ POS-INFO is the return from `event-start' or `event-end'."
 
 (defun braille-dot-wh ()
   "Calculate braille dot width and height"
-  (let ((dot-w (/ (window-font-width) braille-ncols))
-        (dot-h (/ (window-font-height) braille-nrows)))
+  (let ((dot-w (/ (window-font-width) (float braille-ncols)))
+        (dot-h (/ (window-font-height) (float braille-nrows))))
     (cons dot-w dot-h)))
 
 (defun braille-posn-to-dot-xy (pos-info)
   "Convert pos-info to dot-space coordinates"
   (let* ((xyn (posn-x-y (posn-at-point (posn-point pos-info)))) ; top left
          (dot-wh (braille-dot-wh))
-         (colrow (braille-colrow-from-rel-xy (posn-object-x-y pos-info)))
+         (colrow (braille-colrow-from-pos-info pos-info))
          (dot-x (+ (/ (car xyn) (car dot-wh)) (car colrow)))
          (dot-y (+ (/ (cdr xyn) (cdr dot-wh)) (cdr colrow))))
     (cons dot-x dot-y)))
@@ -134,8 +136,8 @@ POS-INFO is the return from `event-start' or `event-end'."
 (defun braille-insert-at-dot-xy (dot-xy)
   "Insert braille dot at dotspace (x . y)"
   (let* ((dot-wh (braille-dot-wh))
-         (xy (cons (* (car dot-xy) (car dot-wh))
-                   (* (cdr dot-xy) (cdr dot-wh)))))
+         (xy (cons (floor (* (car dot-xy) (car dot-wh)))
+                   (floor (* (cdr dot-xy) (cdr dot-wh))))))
     (braille-insert-at-xy xy)))
 
 (defun braille-dotspace-line (dot-xy0 dot-xy1)
