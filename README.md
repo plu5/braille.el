@@ -14,7 +14,10 @@ Implemented:
 
 TBD:
 - [ ] Don't do the deletion/insertion if clicked outside of "canvas"
-- [ ] Right mouse erase
+- [ ] Ctrl left mouse erase
+- [ ] Shift left mouse drag adjust brush size (and message what it's set to)
+- [ ] <kbd>C-c n</kbd> create canvas prompting for size
+- [ ] <kbd>C-c C-n</kbd> create canvas with default size, and make the default adjustable (defcustom) (and message the size of the canvas created)
 - [ ] Draw rectangle
 - [ ] Draw ellipse
 
