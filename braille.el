@@ -22,8 +22,8 @@
 col = 0/1. row = 0/1/2/3."
   (let* ((rel-x (car rel-xy))
          (rel-y (cdr rel-xy))
-         (char-w (frame-char-width))
-         (char-h (frame-char-height))
+         (char-w (window-font-width))
+         (char-h (window-font-height))
          (col (if (< rel-x (/ char-w 2)) 0 1))
          (row (floor (* braille-nrows (/ (float rel-y) char-h)))))
     (cons col row)))
@@ -118,8 +118,8 @@ POS-INFO is the return from `event-start' or `event-end'."
 
 (defun braille-dot-wh ()
   "Calculate braille dot width and height"
-  (let ((dot-w (/ (frame-char-width) braille-nrows))
-        (dot-h (/ (frame-char-height) braille-ncols)))
+  (let ((dot-w (/ (window-font-width) braille-ncols))
+        (dot-h (/ (window-font-height) braille-nrows)))
     (cons dot-w dot-h)))
 
 (defun braille-posn-to-dot-xy (pos-info)
