@@ -3,13 +3,9 @@
 ;; left click to draw
 ;; right click to erase (TBD)
 
-(defcustom braille-interpolation-precision 3
-  "Larger number is less precise, with max precision at 1. This is the
-number dy or dx get divided by to get the number of steps for the
-interpolation.")
-
 (defconst braille-base #x2800 "Start of unicode braille block")
 (defconst braille-nrows 4 "Number of rows in the braille grid")
+(defconst braille-ncols 2 "Number of columns in the braille grid")
 
 (defun braille-create-canvas-at-point (size)
   "Create an area of whitespace with given dimensions."
@@ -60,9 +56,15 @@ E should be a mouse click event."
          (rel-xy (posn-object-x-y pos-info))
          (click-xy (posn-x-y pos-info))
          (colrow (braille-colrow-from-rel-xy rel-xy))
-         (bit (braille-bit-from-colrow colrow)))
-    (message "pos-info:%s char-pos:%d rel-xy:%s click-xy:%s colrow:%s bit:%s"
-             pos-info char-pos rel-xy click-xy colrow bit)))
+         (bit (braille-bit-from-colrow colrow))
+         (char-pos-info (posn-at-point char-pos)))
+    (message
+     "@@ char-pos:%d rel-xy:%s click-xy:%s colrow:%s bit:%s char-xy:%s
+p:%s s:%s"
+     char-pos rel-xy click-xy colrow bit
+     (posn-x-y char-pos-info)
+     char-pos-info
+     (braille-pos-info-debug pos-info))))
 
 (defun braille-char-p (char)
   "If CHAR is a braille character return its delta, otherwise return nil."
@@ -114,28 +116,59 @@ POS-INFO is the return from `event-start' or `event-end'."
              (or text "braille-pos-info-debug") char-pos click-xy
              (posn-x-y char-pos-info) char-pos-info pos-info)))
 
+(defun braille-dot-wh ()
+  "Calculate braille dot width and height"
+  (let ((dot-w (/ (frame-char-width) braille-nrows))
+        (dot-h (/ (frame-char-height) braille-ncols)))
+    (cons dot-w dot-h)))
+
+(defun braille-posn-to-dot-xy (pos-info)
+  "Convert pos-info to dot-space coordinates"
+  (let* ((xyn (posn-x-y (posn-at-point (posn-point pos-info)))) ; top left
+         (dot-wh (braille-dot-wh))
+         (colrow (braille-colrow-from-rel-xy (posn-object-x-y pos-info)))
+         (dot-x (+ (/ (car xyn) (car dot-wh)) (car colrow)))
+         (dot-y (+ (/ (cdr xyn) (cdr dot-wh)) (cdr colrow))))
+    (cons dot-x dot-y)))
+
+(defun braille-insert-at-dot-xy (dot-xy)
+  "Insert braille dot at dotspace (x . y)"
+  (let* ((dot-wh (braille-dot-wh))
+         (xy (cons (* (car dot-xy) (car dot-wh))
+                   (* (cdr dot-xy) (cdr dot-wh)))))
+    (braille-insert-at-xy xy)))
+
+(defun braille-dotspace-line (dot-xy0 dot-xy1)
+  "Draw a line of braille points from XY0 to XY1 in dotspace.
+XY0 and XY1 should each be a position in dotspace like (x . y)
+(dots from the left and dots from the top)"
+  (let* ((dot-wh (braille-dot-wh))
+         (x0 (car dot-xy0))
+         (y0 (cdr dot-xy0))
+         (x1 (car dot-xy1))
+         (y1 (cdr dot-xy1))
+         (dx (abs (- x1 x0)))
+         (dy (abs (- y1 y0)))
+         (sx (if (< x0 x1) 1 -1))
+         (sy (if (< y0 y1) 1 -1))
+         (err (- dx dy)))
+    (while (not (and (= x0 x1) (= y0 y1)))
+      (braille-insert-at-dot-xy (cons x0 y0))
+      (let ((e2 (* 2 err)))
+        (when (> e2 (- dy))
+          (setq err (- err dy))
+          (setq x0 (+ x0 sx)))
+        (when (< e2 dx)
+          (setq err (+ err dx))
+          (setq y0 (+ y0 sy)))))
+    (braille-insert-at-dot-xy (cons x1 y1))))
+
 (defun braille-line (xy0 xy1)
   "Draw a line of braille points from XY0 to XY1.
 XY0 and XY1 should each be a position in pixels like (x . y)"
-  (let (dx dy steps)
-    (setq dx (- (car xy1) (car xy0)))
-    (setq dy (- (cdr xy1) (cdr xy0)))
-    ;; NOTES: (1) abs because dx and dy can be negative
-    ;;        (2) results in more steps than necessary
-    (setq steps (abs (/ (max (abs dx) (abs dy))
-                        braille-interpolation-precision)))
-    ;; (message "dx:%s dy:%s steps:%s" dx dy steps)  ; debug
-    (if (= steps 0)
-        (braille-insert-at-xy xy0)      ; a dot
-      (dotimes (i (1+ steps))           ; a line
-        ;; x0 + dx * i/steps. and must change one to float to avoid
-        ;; rounding the i/steps, then round final result because
-        ;; posn-point must be whole number
-        (let* ((x (round (+ (car xy0) (* dx (/ (float i) steps)))))
-               (y (round (+ (cdr xy0) (* dy (/ (float i) steps)))))
-               (xy (cons x y)))
-          ;; (message "i:%s x:%s y:%s" i x y)  ; debug
-          (braille-insert-at-xy xy))))))
+  (let* ((dot-xy0 (braille-posn-to-dot-xy (posn-at-x-y (car xy0) (cdr xy0))))
+         (dot-xy1 (braille-posn-to-dot-xy (posn-at-x-y (car xy1) (cdr xy1)))))
+    (braille-dotspace-line dot-xy0 dot-xy1)))
 
 (defun braille-draw-line (e)
   "Draw a line of braille points.
@@ -154,15 +187,17 @@ E should be a mouse down event."
   "Draw braille after click while mouse is dragged, stopping when it is let go.
 E should be a mouse down event."
   (interactive "e")
-  (let ((xy-prev (posn-x-y (event-start e)))
-        xy-cur)
-    (braille-insert-at-xy xy-prev)      ; first click
+  (let* ((posn (event-start e))
+         (dot-xy-prev (braille-posn-to-dot-xy posn))
+         dot-xy-cur)
+    (braille-insert-at-dot-xy dot-xy-prev) ; first click
     (track-mouse
       (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
-        (setq xy-cur (posn-x-y (event-start e)))
-        (unless (eq xy-cur xy-prev)
-          (braille-line xy-prev xy-cur))
-        (setq xy-prev xy-cur)))))
+        (setq dot-xy-cur (braille-posn-to-dot-xy (event-start e)))
+        (unless (eq dot-xy-cur dot-xy-prev)
+          (braille-dotspace-line dot-xy-prev dot-xy-cur))
+        ;; (message "movement %s" dot-xy-cur)  ; debug
+        (setq dot-xy-prev dot-xy-cur)))))
 
 ;; temp debug
 ;; (global-set-key [down-mouse-1] #'braille-mouse-draw)
