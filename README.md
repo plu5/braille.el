@@ -9,7 +9,7 @@ Implemented:
 - [x] Mouse drag draw
 - [x] Draw line
 - [x] Linear interpolation: Don't skip when drawing quickly
-- [x] Better(?) interpolation: Dot-space floatless Bresenham
+- [x] Better(?) interpolation: Dot-space Bresenham
 - [x] Minor mode
 
 TBD:
