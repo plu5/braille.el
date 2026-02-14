@@ -206,7 +206,13 @@ E should be a mouse down event."
 ;; (global-set-key [mouse-8] #'braille-click)
 ;; (global-set-key [down-mouse-1] #'braille-draw-line)
 
-;; (define-key braille-mode-map [down-mouse-1] #'braille-mouse-draw)
+(define-minor-mode braille-mode
+  "Toggles global braille-mode.
+Lets you draw in the buffer with braille dots using your mouse."
+  :global t
+  :lighter " ⣿"
+  :keymap
+  '(([down-mouse-1] . braille-mouse-draw)))
 
 (provide 'braille)
 
