@@ -22,6 +22,7 @@ TBD:
 - [ ] Shift left mouse drag adjust brush size (and message what it's set to)
 - [ ] Draw rectangle
 - [ ] Draw ellipse
+- [ ] Different brushes. e.g. rake, halftone
 
 Maybe:
 - [ ] Create a font where the braille dots are blocks for better visibility
