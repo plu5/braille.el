@@ -39,6 +39,7 @@ Maybe:
 | Key                     | Does | Function |
 |-------------------------|------|----------|
 | <kbd>down-mouse-1</kbd> | Draw | `braille-mouse-draw` |
+| <kbd>C-down-mouse-1</kbd> | Erase | `braille-mouse-erase` |
 | <kbd>M-mouse-1</kbd>    | Undo a stroke | `undo` |
 | <kbd>M-S-mouse-1</kbd>  | Redo a stroke | `redo` |
 
