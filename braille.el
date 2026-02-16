@@ -10,7 +10,8 @@
 (defcustom braille-use-blank-grid nil
   "Whether to use the blank grid character '⠀' instead of space.
 This can be useful if you intend to use your artwork in an environment that
-is not going to display it a monospace font."
+is not going to display it a monospace font.
+See `braille-convert-spacing-in-region' to convert existing canvases."
   :type 'boolean
   :group 'braille)
 
@@ -63,6 +64,23 @@ As defined in `braille-default-canvas-size'."
   (interactive)
   (braille-create-canvas-at-point
    (split-string braille-default-canvas-size "x")))
+
+(defun braille-convert-spacing-in-region (beg end)
+  "Convert characters in region from braille blank grid to space or vice versa.
+If a braille blank grid character is found in region, convert braille
+blank grid characters to spaces, otherwise convert spaces to braille
+blank grid characters."
+  (interactive "*r")
+  (save-restriction
+    (narrow-to-region beg end)
+    (let* ((grd (char-to-string braille-base))
+           (spc " ")
+           (old (if (save-excursion (search-forward grd nil t 1)) grd spc))
+           (new (if (eq old grd) spc grd)))
+      (goto-char (point-min))
+      (while (search-forward old nil t 1)
+        (replace-match new))
+      (message "Converted [%s] to [%s] in region %s to %s" old new beg end))))
 
 (defun braille-colrow-from-posn (posn)
     "Calculate col and row of appropriate braille point from posn.

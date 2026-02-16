@@ -12,6 +12,7 @@ Implemented:
 - [x] Better(?) interpolation: Dot-space Bresenham
 - [x] Minor mode
 - [x] Option to use either real spaces or blank grid character '⠀' (helps with alignment when it can't be displayed in a monospace font)
+  \+ function to convert between the two
 - [x] Stroke-wise undo
 - [x] Undo and redo stroke keybindings <kbd>M-mouse-1</kbd> <kbd>M-S-mouse-1</kbd>
 - [x] Avoid drawing out of bounds or on newline characters
@@ -53,3 +54,4 @@ Maybe:
 - [systemcrafters.net: Creating a Custom Minor Mode](https://systemcrafters.net/learning-emacs-lisp/creating-minor-modes/)
 - [GNU Emacs Lisp Reference Manual: Defining Minor Modes](https://www.gnu.org/software/emacs/manual/html_node/elisp/Defining-Minor-Modes.html)
 - [Emacs.SE: atomic undo blocks \[duplicate\]](https://emacs.stackexchange.com/questions/35454/atomic-undo-blocks) 2017 question by izkon, answer by Drew
+- [StackOverflow: emacs: search and replace on a region](https://stackoverflow.com/questions/58307880/emacs-search-and-replace-on-a-region) 2019 question by John Lawrence Aspden, answer by Drew
