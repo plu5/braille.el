@@ -1,7 +1,7 @@
 ;;; braille.el Braille drawing mode
 ;; 2026-02-10 07:04
 ;; left click to draw
-;; right click to erase (TBD)
+;; hold ctrl while drawing to erase
 
 (defgroup braille nil
   "Braille drawing engine."
@@ -29,6 +29,12 @@ Expected to be used in combination with `braille-use-blank-grid' t."
 (defconst braille-nrows 4 "Number of rows in the braille grid")
 (defconst braille-ncols 2 "Number of columns in the braille grid")
 
+(defun braille-empty-char ()
+  "Return the character used for empty canvas in braille.
+Either space or the blank grid character '⠀', according to the value of
+`braille-use-blank-grid'."
+  (if braille-use-blank-grid ?\u2800 ?\s))
+
 (defun braille-create-canvas-at-point (size)
   "Create an area of whitespace with given dimensions."
   (interactive (list (split-string (read-string "Canvas size: " "40x10") "x")))
@@ -36,7 +42,7 @@ Expected to be used in combination with `braille-use-blank-grid' t."
     (user-error "Expected canvas size format: WxH (ex. 40x10)"))
   (let ((h (string-to-number (cadr size)))
         (w (string-to-number (car size)))
-        (c (if braille-use-blank-grid ?\u2800 ?\s)))
+        (c (braille-empty-char)))
     (dotimes (i h)
       (insert (make-string w c) "\n"))))
 
@@ -111,11 +117,12 @@ p:%s s:%s"
   (braille-bit-from-colrow
    (braille-colrow-from-posn posn)))
 
-(defun braille-insert-at-xy (xy)
+(defun braille-insert-at-xy (xy &optional erase)
   "Place braille dot at appropriate position based on pixel coordinates XY.
 Places the first dot or Adds it to the existing dots if character under
 point is a braille character.
-XY should be (x . y) where x and y are pixel coordinates."
+XY should be (x . y) where x and y are pixel coordinates.
+If ERASE is t, erase the dot instead of placing it."
   (let* ((posn (posn-at-x-y (car xy) (cdr xy)))
          (char-pos (posn-point posn))
          (dot-bit (braille-bit-from-posn posn))
@@ -127,7 +134,15 @@ XY should be (x . y) where x and y are pixel coordinates."
           (let* ((char (char-after))
                  (d (braille-char-p char))
                  (new-dot-value
-                  (if d (logior d dot-bit) dot-bit)))
+                  (if erase
+                      (if d (logand d (lognot dot-bit)) 0)
+                    (if d (logior d dot-bit) dot-bit)))
+                 (c (if (and erase (= 0 new-dot-value))
+                        (braille-empty-char)
+                      (+ #x2800 new-dot-value))))
+;;             (message
+;;              "braille-insert-at-xy char:%s d:%s erase:%s
+;; new-dot-value:%s c:%s" char d erase new-dot-value c)  ; debug
             (if (eq char ?\n)
                 (message "braille: out of bounds (newline character)")
               (if (or (and braille-consider-text-out-of-bounds
@@ -136,7 +151,7 @@ XY should be (x . y) where x and y are pixel coordinates."
                            (eq char ?\s)))
                   (message "braille: out of bounds (text)")
                 (delete-char 1)
-                (insert (+ #x2800 new-dot-value))))))
+                (insert c)))))
       (message "braille: out of bounds"))))
 
 (defun braille-click (e)
@@ -172,17 +187,19 @@ POSN is the return from `event-start' or `event-end'."
          (dot-y (+ (/ (cdr xyn) (cdr dot-wh)) (cdr colrow))))
     (cons dot-x dot-y)))
 
-(defun braille-insert-at-dot-xy (dot-xy)
-  "Insert braille dot at dotspace (x . y)"
+(defun braille-insert-at-dot-xy (dot-xy &optional erase)
+  "Insert braille dot at dotspace (x . y)
+If ERASE is t, erase instead."
   (let* ((dot-wh (braille-dot-wh))
          (xy (cons (floor (* (car dot-xy) (car dot-wh)))
                    (floor (* (cdr dot-xy) (cdr dot-wh))))))
-    (braille-insert-at-xy xy)))
+    (braille-insert-at-xy xy erase)))
 
-(defun braille-dotspace-line (dot-xy0 dot-xy1)
+(defun braille-dotspace-line (dot-xy0 dot-xy1 &optional erase)
   "Draw a line of braille points from XY0 to XY1 in dotspace.
 XY0 and XY1 should each be a position in dotspace like (x . y)
-(dots from the left and dots from the top)"
+(dots from the left and dots from the top)
+If ERASE is t, erase instead."
   (let* ((dot-wh (braille-dot-wh))
          (x0 (car dot-xy0))
          (y0 (cdr dot-xy0))
@@ -194,7 +211,7 @@ XY0 and XY1 should each be a position in dotspace like (x . y)
          (sy (if (< y0 y1) 1 -1))
          (err (- dx dy)))
     (while (not (and (= x0 x1) (= y0 y1)))
-      (braille-insert-at-dot-xy (cons x0 y0))
+      (braille-insert-at-dot-xy (cons x0 y0) erase)
       (let ((e2 (* 2 err)))
         (when (> e2 (- dy))
           (setq err (- err dy))
@@ -202,7 +219,7 @@ XY0 and XY1 should each be a position in dotspace like (x . y)
         (when (< e2 dx)
           (setq err (+ err dx))
           (setq y0 (+ y0 sy)))))
-    (braille-insert-at-dot-xy (cons x1 y1))))
+    (braille-insert-at-dot-xy (cons x1 y1) erase)))
 
 (defun braille-line (xy0 xy1)
   "Draw a line of braille points from XY0 to XY1.
@@ -225,23 +242,30 @@ E should be a mouse down event."
       (setq xy1 (posn-x-y (event-end e))) ; end xy
       (braille-line xy0 xy1))))
 
-(defun braille-mouse-draw (e)
-  "Draw braille after click while mouse is dragged, stopping when it is let go.
-E should be a mouse down event."
+(defun braille-mouse-draw (e &optional erase)
+  "Draw braille while mouse is dragged, stopping when it is let go.
+E should be a mouse down event.
+If ERASE is t, erase instead."
   (interactive "e")
   (undo-boundary)
   (let* ((posn (event-start e))
          (dot-xy-prev (braille-posn-to-dot-xy posn))
          dot-xy-cur)
     ;; (message "braille-mouse-draw posn: %s" posn)  ; debug
-    (braille-insert-at-dot-xy dot-xy-prev) ; first click
+    (braille-insert-at-dot-xy dot-xy-prev erase) ; first click
     (track-mouse
       (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
         (setq dot-xy-cur (braille-posn-to-dot-xy (event-start e)))
         (unless (eq dot-xy-cur dot-xy-prev)
-          (braille-dotspace-line dot-xy-prev dot-xy-cur))
+          (braille-dotspace-line dot-xy-prev dot-xy-cur erase))
         ;; (message "movement %s" dot-xy-cur)  ; debug
         (setq dot-xy-prev dot-xy-cur)))))
+
+(defun braille-mouse-erase (e &optional erase)
+  "Erase braille while mouse is dragged, stopping when it is let go.
+E should be a mouse down event."
+  (interactive "e")
+  (braille-mouse-draw e t))
 
 ;; temp debug
 ;; (global-set-key [down-mouse-1] #'braille-mouse-draw)
@@ -258,6 +282,8 @@ Lets you draw in the buffer with braille dots using your mouse."
   :keymap
   '(([down-mouse-1] . braille-mouse-draw)
     ([mouse-1] . ignore)
+    ([C-down-mouse-1] . braille-mouse-erase)
+    ([C-mouse-1] . ignore)
     ([M-mouse-1] . undo)
     ([M-down-mouse-1] . ignore)
     ([M-S-mouse-1] . redo)))

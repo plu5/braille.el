@@ -15,9 +15,9 @@ Implemented:
 - [x] Stroke-wise undo
 - [x] Undo and redo stroke keybindings <kbd>M-mouse-1</kbd> <kbd>M-S-mouse-1</kbd>
 - [x] Avoid drawing out of bounds or on newline characters
+- [x] Hold <kbd>Ctrl</kbd> while drawing to erase
 
 TBD:
-- [ ] Ctrl left mouse erase
 - [ ] Shift left mouse drag adjust brush size (and message what it's set to)
 - [ ] <kbd>C-c n</kbd> create canvas prompting for size
 - [ ] <kbd>C-c C-n</kbd> create canvas with default size, and make the default adjustable (defcustom) (and message the size of the canvas created)
