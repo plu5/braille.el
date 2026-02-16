@@ -7,6 +7,8 @@
   "Whether to use the blank grid character '⠀' instead of space.
 This can be useful if you intend to use your artwork in an environment that
 is not going to display it a monospace font.")
+(defcustom braille-consider-text-out-of-bounds t
+  "Avoid drawing on characters that are not either braille or space.")
 
 (defconst braille-base #x2800 "Start of unicode braille block")
 (defconst braille-nrows 4 "Number of rows in the braille grid")
@@ -113,8 +115,11 @@ XY should be (x . y) where x and y are pixel coordinates."
                   (if d (logior d dot-bit) dot-bit)))
             (if (eq char ?\n)
                 (message "braille: out of bounds (newline character)")
-              (delete-char 1)
-              (insert (+ #x2800 new-dot-value)))))
+              (if (and braille-consider-text-out-of-bounds
+                       (null d) (not (eq char ?\s)))
+                  (message "braille: out of bounds (text)")
+                (delete-char 1)
+                (insert (+ #x2800 new-dot-value))))))
       (message "braille: out of bounds"))))
 
 (defun braille-click (e)
