@@ -11,6 +11,7 @@ Implemented:
 - [x] Linear interpolation: Don't skip when drawing quickly
 - [x] Better(?) interpolation: Dot-space Bresenham
 - [x] Minor mode
+- [x] Option to use either real spaces or blank grid character '⠀' (helps with alignment when it can't be displayed in a monospace font)
 
 TBD:
 - [ ] Don't do the deletion/insertion if clicked outside of "canvas"

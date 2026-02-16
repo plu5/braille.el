@@ -3,6 +3,11 @@
 ;; left click to draw
 ;; right click to erase (TBD)
 
+(defcustom braille-use-blank-grid nil
+  "Whether to use the blank grid character '⠀' instead of space.
+This can be useful if you intend to use your artwork in an environment that
+is not going to display it a monospace font.")
+
 (defconst braille-base #x2800 "Start of unicode braille block")
 (defconst braille-nrows 4 "Number of rows in the braille grid")
 (defconst braille-ncols 2 "Number of columns in the braille grid")
@@ -13,9 +18,10 @@
   (unless (= (length size) 2)
     (user-error "Expected canvas size format: WxH (ex. 40x10)"))
   (let ((h (string-to-number (cadr size)))
-        (w (string-to-number (car size))))
+        (w (string-to-number (car size)))
+        (c (if braille-use-blank-grid ?\u2800 ?\s)))
     (dotimes (i h)
-      (insert (concat (make-string w ? ) "\n")))))
+      (insert (make-string w c) "\n"))))
 
 (defun braille-colrow-from-posn (posn)
     "Calculate col and row of appropriate braille point from posn.
@@ -71,9 +77,7 @@ p:%s s:%s"
 (defun braille-char-p (char)
   "If CHAR is a braille character return its delta, otherwise return nil."
   (let ((delta (- char braille-base)))
-    ;; empty braille character (delta==0) intentionally omitted
-    ;; (i prefer to just have space but maybe it could be configurable)
-    (if (and (> delta 0) (< delta 256))
+    (if (and (>= delta 0) (< delta 256))
         delta)))
 
 (defun braille-bit-from-posn (posn)
