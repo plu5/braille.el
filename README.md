@@ -14,9 +14,9 @@ Implemented:
 - [x] Option to use either real spaces or blank grid character '⠀' (helps with alignment when it can't be displayed in a monospace font)
 - [x] Stroke-wise undo
 - [x] Undo and redo stroke keybindings <kbd>M-mouse-1</kbd> <kbd>M-S-mouse-1</kbd>
+- [x] Avoid drawing out of bounds or on newline characters
 
 TBD:
-- [ ] Don't do the deletion/insertion if clicked outside of "canvas"
 - [ ] Ctrl left mouse erase
 - [ ] Shift left mouse drag adjust brush size (and message what it's set to)
 - [ ] <kbd>C-c n</kbd> create canvas prompting for size

@@ -55,6 +55,15 @@ COLROW is (col . row) for the dot position in the 2x4 braille grid, 0-based."
      ((and (= col 1) (= row 2)) #b00100000)
      ((and (= col 1) (= row 3)) #b10000000))))
 
+(defun braille-in-bounds-p (posn)
+  "If POSN is in bounds for braille drawing return t, nil otherwise."
+  (let ((click-xy (posn-x-y posn))
+        (char-xy (posn-x-y (posn-at-point (posn-point posn))))
+        (rel-wh (posn-object-width-height posn)))
+    ;; (message "bounds calc %s %s %s" click-xy char-xy rel-wh)  ; debug
+    (and (<= (car click-xy) (+ (car char-xy) (car rel-wh)))
+         (<= (cdr click-xy) (+ (cdr char-xy) (cdr rel-wh))))))
+
 (defun braille-click-debug (e)
   "Show information about the click position for debugging purposes.
 E should be a mouse click event."
@@ -68,11 +77,11 @@ E should be a mouse click event."
          (char-posn (posn-at-point char-pos)))
     (message
      "@@ char-pos:%d rel-xy:%s click-xy:%s colrow:%s bit:%s char-xy:%s
+in-bounds:%s
 p:%s s:%s"
-     char-pos rel-xy click-xy colrow bit
-     (posn-x-y char-posn)
-     char-posn
-     (braille-posn-debug posn))))
+     char-pos rel-xy click-xy colrow bit (posn-x-y char-posn)
+     (braille-in-bounds-p posn)
+     char-posn (braille-posn-debug posn))))
 
 (defun braille-char-p (char)
   "If CHAR is a braille character return its delta, otherwise return nil."
@@ -94,15 +103,19 @@ XY should be (x . y) where x and y are pixel coordinates."
          (char-pos (posn-point posn))
          (dot-bit (braille-bit-from-posn posn))
          (inhibit-modification-hooks t)) ; FIXME: potentially problematic
-    (unless (>= char-pos (point-max))
-      (save-excursion
-        (goto-char char-pos)
-        (let* ((char (char-after))
-               (d (braille-char-p char))
-               (new-dot-value
-                (if d (logior d dot-bit) dot-bit)))
-          (delete-char 1)
-          (insert (+ #x2800 new-dot-value)))))))
+    (if (braille-in-bounds-p posn)
+        (save-excursion
+          ;; (message "in bounds %s" posn)  ; debug
+          (goto-char char-pos)
+          (let* ((char (char-after))
+                 (d (braille-char-p char))
+                 (new-dot-value
+                  (if d (logior d dot-bit) dot-bit)))
+            (if (eq char ?\n)
+                (message "braille: out of bounds (newline character)")
+              (delete-char 1)
+              (insert (+ #x2800 new-dot-value)))))
+      (message "braille: out of bounds"))))
 
 (defun braille-click (e)
   "Place braille dot at appropriate position based on mouse location.
@@ -198,6 +211,7 @@ E should be a mouse down event."
   (let* ((posn (event-start e))
          (dot-xy-prev (braille-posn-to-dot-xy posn))
          dot-xy-cur)
+    ;; (message "braille-mouse-draw posn: %s" posn)  ; debug
     (braille-insert-at-dot-xy dot-xy-prev) ; first click
     (track-mouse
       (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
