@@ -16,11 +16,10 @@ Implemented:
 - [x] Undo and redo stroke keybindings <kbd>M-mouse-1</kbd> <kbd>M-S-mouse-1</kbd>
 - [x] Avoid drawing out of bounds or on newline characters
 - [x] Hold <kbd>Ctrl</kbd> while drawing to erase
+- [x] <kbd>C-c n</kbd> create canvas prompting for size. <kbd>C-c C-n</kbd> create canvas with default size, and make the default adjustable (defcustom) (and message the size of the canvas created)
 
 TBD:
 - [ ] Shift left mouse drag adjust brush size (and message what it's set to)
-- [ ] <kbd>C-c n</kbd> create canvas prompting for size
-- [ ] <kbd>C-c C-n</kbd> create canvas with default size, and make the default adjustable (defcustom) (and message the size of the canvas created)
 - [ ] Draw rectangle
 - [ ] Draw ellipse
 
@@ -42,6 +41,8 @@ Maybe:
 | <kbd>C-down-mouse-1</kbd> | Erase | `braille-mouse-erase` |
 | <kbd>M-mouse-1</kbd>    | Undo a stroke | `undo` |
 | <kbd>M-S-mouse-1</kbd>  | Redo a stroke | `redo` |
+| <kbd>C-c n</kbd>        | Create canvas prompting for size | `braille-create-canvas-at-point` |
+| <kbd>C-c C-n</kbd>      | Create canvas with default size | `braille-create-canvas-at-point-without-asking` |
 
 ## Resources used
 - [Emacs.SE: How to access mouse event coordinates? (conveniently)](https://emacs.stackexchange.com/questions/51596/how-to-access-mouse-event-coordinates-conveniently) 2019 question by ideasman42, answer by wasamasa

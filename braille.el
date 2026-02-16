@@ -25,6 +25,14 @@ Expected to be used in combination with `braille-use-blank-grid' t."
   :type 'boolean
   :group 'braille)
 
+(defcustom braille-default-canvas-size "50x20"
+  "Canvas size in the format WxH to use as default dimensions.
+Used in `braille-create-canvas-at-point-without-asking' and in
+`braille-create-canvas-at-point' as the default value.
+The unit of W and H is number of characters."
+  :type 'string
+  :group 'braille)
+
 (defconst braille-base #x2800 "Start of unicode braille block")
 (defconst braille-nrows 4 "Number of rows in the braille grid")
 (defconst braille-ncols 2 "Number of columns in the braille grid")
@@ -37,14 +45,24 @@ Either space or the blank grid character '⠀', according to the value of
 
 (defun braille-create-canvas-at-point (size)
   "Create an area of whitespace with given dimensions."
-  (interactive (list (split-string (read-string "Canvas size: " "40x10") "x")))
+  (interactive
+   (list (split-string
+          (read-string "Canvas size: " braille-default-canvas-size) "x")))
   (unless (= (length size) 2)
     (user-error "Expected canvas size format: WxH (ex. 40x10)"))
   (let ((h (string-to-number (cadr size)))
         (w (string-to-number (car size)))
         (c (braille-empty-char)))
     (dotimes (i h)
-      (insert (make-string w c) "\n"))))
+      (insert (make-string w c) "\n"))
+    (message "Created %s canvas" size)))
+
+(defun braille-create-canvas-at-point-without-asking ()
+  "Create an area of whitespace with default dimensions.
+As defined in `braille-default-canvas-size'."
+  (interactive)
+  (braille-create-canvas-at-point
+   (split-string braille-default-canvas-size "x")))
 
 (defun braille-colrow-from-posn (posn)
     "Calculate col and row of appropriate braille point from posn.
@@ -286,7 +304,9 @@ Lets you draw in the buffer with braille dots using your mouse."
     ([C-mouse-1] . ignore)
     ([M-mouse-1] . undo)
     ([M-down-mouse-1] . ignore)
-    ([M-S-mouse-1] . redo)))
+    ([M-S-mouse-1] . redo)
+    ([(control ?c) ?n] . braille-create-canvas-at-point)
+    ([(control ?c) (control ?n)] . braille-create-canvas-at-point-without-asking)))
 
 (provide 'braille)
 
