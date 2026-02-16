@@ -3,15 +3,27 @@
 ;; left click to draw
 ;; right click to erase (TBD)
 
+(defgroup braille nil
+  "Braille drawing engine."
+  :group 'mouse)
+
 (defcustom braille-use-blank-grid nil
   "Whether to use the blank grid character '⠀' instead of space.
 This can be useful if you intend to use your artwork in an environment that
-is not going to display it a monospace font.")
+is not going to display it a monospace font."
+  :type 'boolean
+  :group 'braille)
+
 (defcustom braille-consider-text-out-of-bounds t
-  "Avoid drawing on characters that are not either braille or space.")
+  "Avoid drawing on characters that are not either braille or space."
+  :type 'boolean
+  :group 'braille)
+
 (defcustom braille-consider-space-out-of-bounds nil
   "Avoid drawing on space.
-Expected to be used in combination with `braille-use-blank-grid' t.")
+Expected to be used in combination with `braille-use-blank-grid' t."
+  :type 'boolean
+  :group 'braille)
 
 (defconst braille-base #x2800 "Start of unicode braille block")
 (defconst braille-nrows 4 "Number of rows in the braille grid")
