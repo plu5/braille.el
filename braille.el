@@ -261,7 +261,7 @@ If ERASE is t, erase instead."
         ;; (message "movement %s" dot-xy-cur)  ; debug
         (setq dot-xy-prev dot-xy-cur)))))
 
-(defun braille-mouse-erase (e &optional erase)
+(defun braille-mouse-erase (e)
   "Erase braille while mouse is dragged, stopping when it is let go.
 E should be a mouse down event."
   (interactive "e")
