@@ -221,6 +221,7 @@ Lets you draw in the buffer with braille dots using your mouse."
   :lighter " ⣿"
   :keymap
   '(([down-mouse-1] . braille-mouse-draw)
+    ([mouse-1] . ignore)
     ([M-mouse-1] . undo)
     ([M-down-mouse-1] . ignore)
     ([M-S-mouse-1] . redo)))
