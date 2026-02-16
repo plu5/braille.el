@@ -181,6 +181,7 @@ XY0 and XY1 should each be a position in pixels like (x . y)"
 Interpolates a line from position mouse is pressed to position it is let go.
 E should be a mouse down event."
   (interactive "e")
+  (undo-boundary)
   (track-mouse
     (let (xy0 xy1)
       (setq xy0 (posn-x-y (event-start e))) ; start xy
@@ -193,6 +194,7 @@ E should be a mouse down event."
   "Draw braille after click while mouse is dragged, stopping when it is let go.
 E should be a mouse down event."
   (interactive "e")
+  (undo-boundary)
   (let* ((posn (event-start e))
          (dot-xy-prev (braille-posn-to-dot-xy posn))
          dot-xy-cur)
