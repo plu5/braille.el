@@ -13,6 +13,7 @@ Implemented:
 - [x] Minor mode
 - [x] Option to use either real spaces or blank grid character '⠀' (helps with alignment when it can't be displayed in a monospace font)
 - [x] Stroke-wise undo
+- [x] Undo and redo stroke keybindings <kbd>M-mouse-1</kbd> <kbd>M-S-mouse-1</kbd>
 
 TBD:
 - [ ] Don't do the deletion/insertion if clicked outside of "canvas"
@@ -29,10 +30,17 @@ Maybe:
 - [ ] Animation
 
 ## Usage
-- Turn on minor mode (<kbd>M-x</kbd> `braille-mode`); this will take over some of your keys, like left mouse
+- Turn on minor mode (<kbd>M-x</kbd> `braille-mode`); this will take over [some of your keys](#keybindings), notably the left mouse button
 - Create "canvas" (adds a bunch of lines filled with spaces)
   + <kbd>M-x</kbd> `braille-create-canvas-at-point`
 - Click and drag left mouse on the canvas (or any existing characters)
+
+### Keybindings
+| Key                     | Does | Function |
+|-------------------------|------|----------|
+| <kbd>down-mouse-1</kbd> | Draw | `braille-mouse-draw` |
+| <kbd>M-mouse-1</kbd>    | Undo a stroke | `undo` |
+| <kbd>M-S-mouse-1</kbd>  | Redo a stroke | `redo` |
 
 ## Resources used
 - [Emacs.SE: How to access mouse event coordinates? (conveniently)](https://emacs.stackexchange.com/questions/51596/how-to-access-mouse-event-coordinates-conveniently) 2019 question by ideasman42, answer by wasamasa
@@ -41,3 +49,4 @@ Maybe:
 - [Wikipedia Bresenham plotLine reference implementation](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm)
 - [systemcrafters.net: Creating a Custom Minor Mode](https://systemcrafters.net/learning-emacs-lisp/creating-minor-modes/)
 - [GNU Emacs Lisp Reference Manual: Defining Minor Modes](https://www.gnu.org/software/emacs/manual/html_node/elisp/Defining-Minor-Modes.html)
+- [Emacs.SE: atomic undo blocks \[duplicate\]](https://emacs.stackexchange.com/questions/35454/atomic-undo-blocks) 2017 question by izkon, answer by Drew
