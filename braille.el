@@ -42,7 +42,15 @@ The unit of W and H is number of characters."
   "Return the character used for empty canvas in braille.
 Either space or the blank grid character '⠀', according to the value of
 `braille-use-blank-grid'."
-  (if braille-use-blank-grid ?\u2800 ?\s))
+  (if braille-use-blank-grid braille-base ?\s))
+
+(defun braille-char-name-or-char (c)
+  "Return description for space and blank braille grid if c is one of them.
+Otherwise, return c as a string."
+  (cond
+   ((equal c ?\s) "space")
+   ((equal c braille-base) "blank braille grid")
+   (t (char-to-string c))))
 
 (defun braille-create-canvas-at-point (size)
   "Create an area of whitespace with given dimensions."
@@ -56,7 +64,8 @@ Either space or the blank grid character '⠀', according to the value of
         (c (braille-empty-char)))
     (dotimes (i h)
       (insert (make-string w c) "\n"))
-    (message "Created %s canvas" size)))
+    (message "Created %s canvas with %s character" size
+             (braille-char-name-or-char c))))
 
 (defun braille-create-canvas-at-point-without-asking ()
   "Create an area of whitespace with default dimensions.
@@ -80,7 +89,9 @@ blank grid characters."
       (goto-char (point-min))
       (while (search-forward old nil t 1)
         (replace-match new))
-      (message "Converted [%s] to [%s] in region %s to %s" old new beg end))))
+      (message "Converted [%s] (%s) to [%s] (%s) in region %s to %s"
+               old (braille-char-name-or-char (string-to-char old))
+               new (braille-char-name-or-char (string-to-char new)) beg end))))
 
 (defun braille-colrow-from-posn (posn)
     "Calculate col and row of appropriate braille point from posn.
