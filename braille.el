@@ -48,8 +48,8 @@ Either space or the blank grid character '⠀', according to the value of
   "Return description for space and blank braille grid if c is one of them.
 Otherwise, return c as a string."
   (cond
-   ((equal c ?\s) "space")
-   ((equal c braille-base) "blank braille grid")
+   ((eq c ?\s) "space")
+   ((eq c braille-base) "blank braille grid")
    (t (char-to-string c))))
 
 (defun braille-create-canvas-at-point (size)
