@@ -1,7 +1,17 @@
-;;; braille.el Braille drawing mode
+;;; braille.el -- Braille drawing minor mode  -*- lexical-binding: t; -*-
 ;; 2026-02-10 07:04
+;; Author: plu5
+;; Keywords: mouse
+;; URL: https://github.com/plu5/braille.el
+;; This file is not part of GNU Emacs.
+
+;;; Commentary:
+;; M-x braille-mode
+;; create canvas
 ;; left click to draw
 ;; hold ctrl while drawing to erase
+
+;;; Code:
 
 (defgroup braille nil
   "Braille drawing engine."
