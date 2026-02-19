@@ -135,10 +135,14 @@ COLROW is (col . row) for the dot position in the 2x4 braille grid, 0-based."
      ((and (= col 1) (= row 2)) #b00100000)
      ((and (= col 1) (= row 3)) #b10000000))))
 
+(defun braille-posn-char-xy (posn)
+  "Return char top left pixel coordinates (x . y) given POSN."
+  (posn-x-y (posn-at-point (posn-point posn))))
+
 (defun braille-in-bounds-p (posn)
   "If POSN is in bounds for braille drawing return t, nil otherwise."
   (let ((click-xy (posn-x-y posn))
-        (char-xy (posn-x-y (posn-at-point (posn-point posn))))
+        (char-xy (braille-posn-char-xy posn))
         (rel-wh (posn-object-width-height posn)))
     ;; (message "bounds calc %s %s %s" click-xy char-xy rel-wh)  ; debug
     (and (<= (car click-xy) (+ (car char-xy) (car rel-wh)))
@@ -241,7 +245,7 @@ POSN is the return from `event-start' or `event-end'."
 
 (defun braille-posn-to-dot-xy (posn)
   "Convert posn to dotspace coordinates."
-  (let* ((xyn (posn-x-y (posn-at-point (posn-point posn)))) ; top left
+  (let* ((xyn (braille-posn-char-xy posn)) ; top left
          (dot-wh (braille-dot-wh))
          (colrow (braille-colrow-from-posn posn))
          (dot-x (+ (/ (car xyn) (car dot-wh)) (car colrow)))
