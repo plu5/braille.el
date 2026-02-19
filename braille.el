@@ -182,48 +182,55 @@ p:%s s:%s"
   "Return the posn at XY, where XY is a cons (x . y) of pixel coordinates."
   (posn-at-x-y (car xy) (cdr xy)))
 
-(defun braille-insert-at-xy (xy &optional erase)
+(defun braille-legal-char-p (char)
+  "Return t if braille.el is allowed to replace CHAR, nil otherwise."
+  (cond
+   ((and (eq char ?\n)
+         (message "braille: out of bounds (newline character)"))
+    nil)
+   ((and braille-consider-space-out-of-bounds (eq char ?\s)
+         (message "braille: out of bounds (space)"))
+    nil)
+   ((and braille-consider-text-out-of-bounds
+         (null (braille-char-p char)) (not (eq char ?\s))
+         (message "braille: out of bounds (text)"))
+    nil)
+   (t t)))
+
+(defun braille-onto (char-pos dot-bit &optional erase)
+  "Replace char at CHAR-POS if legal, adding or erasing dot DOT-BIT from it."
+  (save-excursion
+    (goto-char char-pos)
+    (let ((cur-char (char-after)))
+      (if (braille-legal-char-p cur-char)
+          (let* ((d (braille-char-p cur-char)) ; delta
+                 (new-dot-value (if erase
+                                    (if d (logand d (lognot dot-bit)) 0)
+                                  (if d (logior d dot-bit) dot-bit)))
+                 (new-char (if (and erase (= 0 new-dot-value))
+                               (braille-empty-char)
+                             (+ braille-base new-dot-value))))
+            (delete-char 1)
+            (insert new-char))))))
+
+(defun braille-onto-xy (xy &optional erase)
   "Place braille dot at appropriate position based on pixel coordinates XY.
-Places the first dot or Adds it to the existing dots if character under
-point is a braille character.
+Places the first dot or adds it to the existing dots if character under
+point is already a braille character.
 XY should be (x . y) where x and y are pixel coordinates.
 If ERASE is t, erase the dot instead of placing it."
   (let* ((posn (braille-posn-at-xy xy))
          (char-pos (posn-point posn))
-         (dot-bit (braille-bit-from-posn posn))
-         (inhibit-modification-hooks t)) ; FIXME: potentially problematic
+         (dot-bit (braille-bit-from-posn posn)))
     (if (braille-in-bounds-p posn)
-        (save-excursion
-          ;; (message "in bounds %s" posn)  ; debug
-          (goto-char char-pos)
-          (let* ((char (char-after))
-                 (d (braille-char-p char))
-                 (new-dot-value
-                  (if erase
-                      (if d (logand d (lognot dot-bit)) 0)
-                    (if d (logior d dot-bit) dot-bit)))
-                 (c (if (and erase (= 0 new-dot-value))
-                        (braille-empty-char)
-                      (+ #x2800 new-dot-value))))
-;;             (message
-;;              "braille-insert-at-xy char:%s d:%s erase:%s
-;; new-dot-value:%s c:%s" char d erase new-dot-value c)  ; debug
-            (if (eq char ?\n)
-                (message "braille: out of bounds (newline character)")
-              (if (or (and braille-consider-text-out-of-bounds
-                           (null d) (not (eq char ?\s)))
-                      (and braille-consider-space-out-of-bounds
-                           (eq char ?\s)))
-                  (message "braille: out of bounds (text)")
-                (delete-char 1)
-                (insert c)))))
+        (braille-onto char-pos dot-bit erase)
       (message "braille: out of bounds"))))
 
 (defun braille-click (e)
   "Place braille dot at appropriate position based on mouse location.
 E should be a mouse click event."
   (interactive "e")
-  (braille-insert-at-xy (posn-x-y (event-start e))))
+  (braille-onto-xy (posn-x-y (event-start e))))
 
 (defun braille-posn-debug (posn &optional text)
   "Show message with information from POSN.
@@ -258,7 +265,7 @@ If ERASE is t, erase instead."
   (let* ((dot-wh (braille-dot-wh))
          (xy (cons (floor (* (car dot-xy) (car dot-wh)))
                    (floor (* (cdr dot-xy) (cdr dot-wh))))))
-    (braille-insert-at-xy xy erase)))
+    (braille-onto-xy xy erase)))
 
 (defun braille-dotspace-line (dot-xy0 dot-xy1 &optional erase)
   "Draw a line of braille points from XY0 to XY1 in dotspace.
