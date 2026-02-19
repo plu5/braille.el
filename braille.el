@@ -170,9 +170,13 @@ p:%s s:%s"
         delta)))
 
 (defun braille-bit-from-posn (posn)
-  "Get bit for appropriate dot given mouse event event-start information."
+  "Get bit for appropriate dot given POSN."
   (braille-bit-from-colrow
    (braille-colrow-from-posn posn)))
+
+(defun braille-posn-at-xy (xy)
+  "Return the posn at XY, where XY is a cons (x . y) of pixel coordinates."
+  (posn-at-x-y (car xy) (cdr xy)))
 
 (defun braille-insert-at-xy (xy &optional erase)
   "Place braille dot at appropriate position based on pixel coordinates XY.
@@ -180,7 +184,7 @@ Places the first dot or Adds it to the existing dots if character under
 point is a braille character.
 XY should be (x . y) where x and y are pixel coordinates.
 If ERASE is t, erase the dot instead of placing it."
-  (let* ((posn (posn-at-x-y (car xy) (cdr xy)))
+  (let* ((posn (braille-posn-at-xy xy))
          (char-pos (posn-point posn))
          (dot-bit (braille-bit-from-posn posn))
          (inhibit-modification-hooks t)) ; FIXME: potentially problematic
@@ -223,7 +227,7 @@ POSN is the return from `event-start' or `event-end'."
   (let (char-pos click-xy char-posn)
     (setq char-pos (posn-point posn))
     (setq click-xy (posn-x-y posn))
-    (setq char-posn (posn-at-x-y (car click-xy) (cdr click-xy)))
+    (setq char-posn (braille-posn-at-xy click-xy))
     (message "%s char-pos:%s | click-xy:%s |\
  char-pos-xy:%s | posn:%s | char-posn:%s"
              (or text "braille-posn-debug") char-pos click-xy
@@ -281,8 +285,8 @@ If ERASE is t, erase instead."
 (defun braille-line (xy0 xy1)
   "Draw a line of braille points from XY0 to XY1.
 XY0 and XY1 should each be a position in pixels like (x . y)"
-  (let* ((dot-xy0 (braille-posn-to-dot-xy (posn-at-x-y (car xy0) (cdr xy0))))
-         (dot-xy1 (braille-posn-to-dot-xy (posn-at-x-y (car xy1) (cdr xy1)))))
+  (let* ((dot-xy0 (braille-posn-to-dot-xy (braille-posn-at-xy xy0)))
+         (dot-xy1 (braille-posn-to-dot-xy (braille-posn-at-xy xy1))))
     (braille-dotspace-line dot-xy0 dot-xy1)))
 
 (defun braille-draw-line (e)
