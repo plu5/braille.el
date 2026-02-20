@@ -55,3 +55,5 @@ Maybe:
 - [GNU Emacs Lisp Reference Manual: Defining Minor Modes](https://www.gnu.org/software/emacs/manual/html_node/elisp/Defining-Minor-Modes.html)
 - [Emacs.SE: atomic undo blocks \[duplicate\]](https://emacs.stackexchange.com/questions/35454/atomic-undo-blocks) 2017 question by izkon, answer by Drew
 - [StackOverflow: emacs: search and replace on a region](https://stackoverflow.com/questions/58307880/emacs-search-and-replace-on-a-region) 2019 question by John Lawrence Aspden, answer by Drew
+- [GNU Emacs Lisp Reference Manual: Library Headers](https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Headers.html)
+- [emacs-devel 2019 thread about combine-after-change-calls and combine-change-calls](https://lists.endsoftwarepatents.org/archive/html/emacs-devel/2019-04/msg00754.html) messages by Stefan Monnier and Alan Mackenzie
