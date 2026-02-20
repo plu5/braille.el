@@ -44,7 +44,7 @@ Maybe:
 | <kbd>M-mouse-1</kbd>    | Undo a stroke | `undo` |
 | <kbd>M-S-mouse-1</kbd>  | Redo a stroke | `redo` |
 | <kbd>C-c n</kbd>        | Create canvas prompting for size | `braille-create-canvas-at-point` |
-| <kbd>C-c C-n</kbd>      | Create canvas with default size | `braille-create-canvas-at-point-without-asking` |
+| <kbd>C-c C-n</kbd>      | Create canvas with default size | `braille-create-canvas-at-point-unprompted` |
 
 ## Resources used
 - [Emacs.SE: How to access mouse event coordinates? (conveniently)](https://emacs.stackexchange.com/questions/51596/how-to-access-mouse-event-coordinates-conveniently) 2019 question by ideasman42, answer by wasamasa

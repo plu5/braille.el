@@ -90,7 +90,7 @@ Otherwise, return c as a string."
     (message "Created %s canvas with %s character" size
              (braille-char-name-or-char c))))
 
-(defun braille-create-canvas-at-point-without-asking ()
+(defun braille-create-canvas-at-point-unprompted ()
   "Create an area of whitespace with default dimensions.
 As defined in `braille-default-canvas-size'."
   (interactive)
@@ -376,7 +376,7 @@ Lets you draw in the buffer with braille dots using your mouse."
     ([M-down-mouse-1] . ignore)
     ([M-S-mouse-1] . redo)
     ([(control ?c) ?n] . braille-create-canvas-at-point)
-    ([(control ?c) (control ?n)] . braille-create-canvas-at-point-without-asking)))
+    ([(control ?c) (control ?n)] . braille-create-canvas-at-point-unprompted)))
 
 (provide 'braille)
 
