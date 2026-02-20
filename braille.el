@@ -7,7 +7,7 @@
 
 ;;; Commentary:
 ;; M-x braille-mode
-;; create canvas
+;; create canvas with C-c v (braille-create-canvas-at-point)
 ;; left click to draw
 ;; hold ctrl while drawing to erase
 
@@ -372,8 +372,8 @@ Minor mode for drawing with braille dots."
     ([M-mouse-1] . undo)
     ([M-down-mouse-1] . ignore)
     ([M-S-mouse-1] . redo)
-    ([(control ?c) ?n] . braille-create-canvas-at-point)
-    ([(control ?c) (control ?n)] . braille-create-canvas-at-point-unprompted)))
+    ([(control ?c) ?v] . braille-create-canvas-at-point)
+    ([(control ?c) (control ?v)] . braille-create-canvas-at-point-unprompted)))
 
 (provide 'braille)
 
