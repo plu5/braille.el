@@ -1,34 +1,10 @@
 # braille.el
 Emacs minor mode for drawing with braille characters
-using a mouse or drawing tablet
+using a mouse or drawing tablet.
 
-Work in progress
+braille.el can draw on any character, but by default, for convenience, it will avoid drawing on any character that is not a braille character or space. This can be customised with `braille-consider-text-out-of-bounds`.
 
-Implemented:
-- [x] Add dot to braille character grid according to where in the character the click occurred
-- [x] Mouse drag draw
-- [x] Draw line
-- [x] Linear interpolation: Don't skip when drawing quickly
-- [x] Better(?) interpolation: Dot-space Bresenham
-- [x] Minor mode
-- [x] Option to use either real spaces or blank grid character '⠀' (helps with alignment when it can't be displayed in a monospace font)
-  \+ function to convert between the two
-- [x] Stroke-wise undo
-- [x] Undo and redo stroke keybindings <kbd>M-mouse-1</kbd> <kbd>M-S-mouse-1</kbd>
-- [x] Avoid drawing out of bounds or on newline characters
-- [x] Hold <kbd>Ctrl</kbd> while drawing to erase
-- [x] <kbd>C-c n</kbd> create canvas prompting for size. <kbd>C-c C-n</kbd> create canvas with default size, and make the default adjustable (defcustom) (and message the size of the canvas created)
-
-TBD:
-- [ ] Shift left mouse drag adjust brush size (and message what it's set to)
-- [ ] Draw rectangle
-- [ ] Draw ellipse
-- [ ] Different brushes. e.g. rake, halftone
-
-Maybe:
-- [ ] Create a font where the braille dots are blocks for better visibility
-- [ ] Draw speech bubble (ASCII)
-- [ ] Animation
+braille.el uses by default normal space characters for its canvas. It has the option to use the braille empty grid character instead. This can be useful if you intend to use your artwork in an environment that is not going to display it a monospace font. `(setq braille-use-blank-grid t)` to set this. You can also then tell braille to consider space out of bounds if you want to only be able to draw on canvases: `braille-consider-space-out-of-bounds`. To convert existing canvases from using space to using blank grid character or vice versa, use the function `braille-convert-spacing-in-region`.
 
 ## Usage
 - Turn on minor mode (<kbd>M-x</kbd> `braille-mode`); this will take over [some of your keys](#keybindings), notably the left mouse button
@@ -44,6 +20,33 @@ Maybe:
 | <kbd>M-S-mouse-1</kbd>  | Redo a stroke | `redo` |
 | <kbd>C-c v</kbd>        | Create canvas prompting for size | `braille-create-canvas-at-point` |
 | <kbd>C-c C-v</kbd>      | Create canvas with default size | `braille-create-canvas-at-point-unprompted` |
+
+## Roadmap
+Implemented:
+- [x] Add dot to braille character grid according to where in the character the click occurred
+- [x] Mouse drag draw
+- [x] Draw line
+- [x] Linear interpolation: Don't skip when drawing quickly
+- [x] Better(?) interpolation: Dot-space Bresenham
+- [x] Minor mode
+- [x] Option to use either real spaces or blank grid character '⠀' (helps with alignment when it can't be displayed in a monospace font)
+  \+ function to convert between the two
+- [x] Stroke-wise undo
+- [x] Undo and redo stroke keybindings <kbd>M-mouse-1</kbd> <kbd>M-S-mouse-1</kbd>
+- [x] Avoid drawing out of bounds or on newline characters
+- [x] Hold <kbd>Ctrl</kbd> while drawing to erase
+- [x] <kbd>C-c v</kbd> create canvas prompting for size. <kbd>C-c C-v</kbd> create canvas with default size, and make the default adjustable (defcustom) (and message the size of the canvas created)
+
+TBD:
+- [ ] Shift left mouse drag adjust brush size (and message what it's set to)
+- [ ] Draw rectangle
+- [ ] Draw ellipse
+- [ ] Different brushes. e.g. rake, halftone
+
+Maybe:
+- [ ] Create a font where the braille dots are blocks for better visibility
+- [ ] Draw speech bubble (ASCII)
+- [ ] Animation
 
 ## Resources used
 - [Emacs.SE: How to access mouse event coordinates? (conveniently)](https://emacs.stackexchange.com/questions/51596/how-to-access-mouse-event-coordinates-conveniently) 2019 question by ideasman42, answer by wasamasa
