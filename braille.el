@@ -161,9 +161,9 @@ COLROW is (col . row) for the dot position in the 2x4 braille grid, 0-based."
     (and (<= (car click-xy) (+ (car char-xy) (car rel-wh)))
          (<= (cdr click-xy) (+ (cdr char-xy) (cdr rel-wh))))))
 
-(defun braille-click-debug (e)
-  "Show information about the click position for debugging purposes.
-E should be a mouse click event."
+(defun braille-e-debug (e)
+  "Show information about the input position for debugging purposes.
+E should be an input event."
   (interactive "e")
   (let* ((posn (event-start e))
          (char-pos (posn-point posn))
@@ -239,9 +239,9 @@ If ERASE is t, erase the dot instead of placing it."
         (braille-onto char-pos dot-bit erase)
       (message "braille: out of bounds"))))
 
-(defun braille-click (e)
+(defun braille-e-single (e)
   "Place braille dot at appropriate position based on mouse location.
-E should be a mouse click event."
+E should be an input event."
   (interactive "e")
   (braille-onto-xy (posn-x-y (event-start e))))
 
@@ -313,7 +313,7 @@ XY0 and XY1 should each be a position in pixels like (x . y)"
          (dot-xy1 (braille-posn-to-dot-xy (braille-posn-at-xy xy1))))
     (braille-dotspace-line dot-xy0 dot-xy1)))
 
-(defun braille-draw-line (e)
+(defun braille-e-line (e)
   "Draw a line of braille points.
 Interpolates a line from position mouse is pressed to position it is let go.
 E should be a mouse down event."
@@ -329,7 +329,7 @@ E should be a mouse down event."
       (setq xy1 (posn-x-y (event-end e))) ; end xy
       (braille-line xy0 xy1))))
 
-(defun braille-mouse-draw (e &optional erase)
+(defun braille-e-stroke (e &optional erase)
   "Draw braille while mouse is dragged, stopping when it is let go.
 E should be a mouse down event.
 If ERASE is t, erase instead."
@@ -349,18 +349,15 @@ If ERASE is t, erase instead."
         ;; (message "movement %s" dot-xy-cur)  ; debug
         (setq dot-xy-prev dot-xy-cur)))))
 
-(defun braille-mouse-erase (e)
+(defun braille-e-stroke-erase (e)
   "Erase braille while mouse is dragged, stopping when it is let go.
 E should be a mouse down event."
   (interactive "e")
   (braille-mouse-draw e t))
 
 ;; temp debug
-;; (global-set-key [down-mouse-1] #'braille-mouse-draw)
-;; (global-unset-key [mouse-1])
-;; (global-set-key [mouse-8] #'braille-click-debug)
-;; (global-set-key [mouse-8] #'braille-click)
-;; (global-set-key [down-mouse-1] #'braille-draw-line)
+;; (global-set-key [mouse-8] #'braille-e-debug)
+;; (global-set-key [down-mouse-1] #'braille-e-line)
 
 (define-minor-mode braille-mode
   "Toggles global braille-mode.
@@ -368,9 +365,9 @@ Lets you draw in the buffer with braille dots using your mouse."
   :global t
   :lighter " ⣿"
   :keymap
-  '(([down-mouse-1] . braille-mouse-draw)
+  '(([down-mouse-1] . braille-e-stroke)
     ([mouse-1] . ignore)
-    ([C-down-mouse-1] . braille-mouse-erase)
+    ([C-down-mouse-1] . braille-e-stroke-erase)
     ([C-mouse-1] . ignore)
     ([M-mouse-1] . undo)
     ([M-down-mouse-1] . ignore)
