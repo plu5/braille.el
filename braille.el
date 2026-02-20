@@ -272,9 +272,9 @@ POSN is the return from `event-start' or `event-end'."
          (dot-y (+ (/ (cdr xyn) (cdr dot-wh)) (cdr colrow))))
     (cons dot-x dot-y)))
 
-(defun braille-insert-at-dot-xy (dot-xy &optional erase)
-  "Insert braille dot at dotspace (dot-x . dot-y).
-If ERASE is t, erase instead."
+(defun braille-onto-dot-xy (dot-xy &optional erase)
+  "Place braille dot at dotspace (dot-x . dot-y).
+If ERASE is t, erase the dot instead of placing it."
   (let* ((dot-wh (braille-dot-wh))
          (xy (cons (floor (* (car dot-xy) (car dot-wh)))
                    (floor (* (cdr dot-xy) (cdr dot-wh))))))
@@ -296,7 +296,7 @@ If ERASE is t, erase instead."
          (sy (if (< y0 y1) 1 -1))
          (err (- dx dy)))
     (while (not (and (= x0 x1) (= y0 y1)))
-      (braille-insert-at-dot-xy (cons x0 y0) erase)
+      (braille-onto-dot-xy (cons x0 y0) erase)
       (let ((e2 (* 2 err)))
         (when (> e2 (- dy))
           (setq err (- err dy))
@@ -304,7 +304,7 @@ If ERASE is t, erase instead."
         (when (< e2 dx)
           (setq err (+ err dx))
           (setq y0 (+ y0 sy)))))
-    (braille-insert-at-dot-xy (cons x1 y1) erase)))
+    (braille-onto-dot-xy (cons x1 y1) erase)))
 
 (defun braille-line (xy0 xy1)
   "Draw a line of braille points from XY0 to XY1.
@@ -340,7 +340,7 @@ If ERASE is t, erase instead."
          dot-xy-cur
          (inhibit-modification-hooks (braille-inhibit-modification-hooks-p)))
     ;; (message "braille-mouse-draw posn: %s" posn)  ; debug
-    (braille-insert-at-dot-xy dot-xy-prev erase) ; first click
+    (braille-onto-dot-xy dot-xy-prev erase) ; first click
     (track-mouse
       (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
         (setq dot-xy-cur (braille-posn-to-dot-xy (event-start e)))
