@@ -39,14 +39,25 @@ Implemented:
 
 TBD:
 - [ ] Shift left mouse drag adjust brush size (and message what it's set to)
+- [ ] down-mouse-1 `braille-e-modal-stroke` which will choose whether to do `braille-e-stroke` or `braille-e-line` or other functions in future for other shapes based on current draw mode
+  + <kbd>C-c q</kbd> to normal, w to line, e to rectangle, r to ellipse, kind of like 3d applications select/translate/scale/rotate bindings. We already have normal drawing and line, so firwst implement the functionality to change between forms to be able to change between these two, then I could add rectangle and ellipse.
 - [ ] Draw rectangle
 - [ ] Draw ellipse
 - [ ] Different brushes. e.g. rake, halftone
 
 Maybe:
 - [ ] Create a font where the braille dots are blocks for better visibility
+- [ ] A repository with GitHub Actions set up to be able to clone any repo of a font and add to it a custom braille block
 - [ ] Draw speech bubble (ASCII)
 - [ ] Animation
+  + separate canvases on the same buffer with a particular line above, then changing the view to each frame.
+- [ ] Selection : marking the start and end dot (teh dot of each corner)
+- [ ] Transformations (move, rotate, scale)
+- [ ] Publish on MELPA
+- [ ] Record video/gif usage demo on emacs -Q
+- [ ] Publish on /r/emacs
+  + "braille.el : Minor mode for drawing with Braille anywhere"
+  + Ask people to share what they made with it. Maybe there are some artists that would want to test it out and share what they made.
 
 ## Resources used
 - [Emacs.SE: How to access mouse event coordinates? (conveniently)](https://emacs.stackexchange.com/questions/51596/how-to-access-mouse-event-coordinates-conveniently) 2019 question by ideasman42, answer by wasamasa
