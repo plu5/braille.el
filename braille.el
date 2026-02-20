@@ -14,7 +14,7 @@
 ;;; Code:
 
 (defgroup braille nil
-  "Braille drawing engine."
+  "Minor mode for drawing with braille dots."
   :group 'mouse)
 
 (defcustom braille-use-blank-grid nil
@@ -361,7 +361,7 @@ E should be a mouse down event."
 
 (define-minor-mode braille-mode
   "Toggles global braille-mode.
-Lets you draw in the buffer with braille dots using your mouse."
+Minor mode for drawing with braille dots."
   :global t
   :lighter " ⣿"
   :keymap
