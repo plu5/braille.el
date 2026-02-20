@@ -280,7 +280,7 @@ If ERASE is t, erase the dot instead of placing it."
                    (floor (* (cdr dot-xy) (cdr dot-wh))))))
     (braille-onto-xy xy erase)))
 
-(defun braille-dotspace-line (dot-xy0 dot-xy1 &optional erase)
+(defun braille-dot-xy-line (dot-xy0 dot-xy1 &optional erase)
   "Draw a line of braille points from DOT-XY0 to DOT-XY1 in dotspace.
 DOT-XY0 and DOT-XY1 should each be a position in dotspace like (dot-x . dot-y)
 (dots from the left and dots from the top).
@@ -306,12 +306,12 @@ If ERASE is t, erase instead."
           (setq y0 (+ y0 sy)))))
     (braille-onto-dot-xy (cons x1 y1) erase)))
 
-(defun braille-line (xy0 xy1)
+(defun braille-xy-line (xy0 xy1)
   "Draw a line of braille points from XY0 to XY1.
 XY0 and XY1 should each be a position in pixels like (x . y)"
   (let* ((dot-xy0 (braille-posn-to-dot-xy (braille-posn-at-xy xy0)))
          (dot-xy1 (braille-posn-to-dot-xy (braille-posn-at-xy xy1))))
-    (braille-dotspace-line dot-xy0 dot-xy1)))
+    (braille-dot-xy-line dot-xy0 dot-xy1)))
 
 (defun braille-e-line (e)
   "Draw a line of braille points.
@@ -327,7 +327,7 @@ E should be a mouse down event."
       (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
         (ignore))
       (setq xy1 (posn-x-y (event-end e))) ; end xy
-      (braille-line xy0 xy1))))
+      (braille-xy-line xy0 xy1))))
 
 (defun braille-e-stroke (e &optional erase)
   "Draw braille while mouse is dragged, stopping when it is let go.
@@ -345,7 +345,7 @@ If ERASE is t, erase instead."
       (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
         (setq dot-xy-cur (braille-posn-to-dot-xy (event-start e)))
         (unless (eq dot-xy-cur dot-xy-prev)
-          (braille-dotspace-line dot-xy-prev dot-xy-cur erase))
+          (braille-dot-xy-line dot-xy-prev dot-xy-cur erase))
         ;; (message "movement %s" dot-xy-cur)  ; debug
         (setq dot-xy-prev dot-xy-cur)))))
 
