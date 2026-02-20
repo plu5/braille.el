@@ -44,9 +44,22 @@ The unit of W and H is number of characters."
   :type 'string
   :group 'braille)
 
+(defcustom braille-inhibit-modification-hooks t
+  "Whether to set `inhibit-modification-hooks' to t while drawing.
+This improves performance at the cost of ignoring
+`before-change-functions', 'after-change-functions', hooks attached to
+text properties and overlays, file locks and related checks, and
+handling of the active region per `select-active-regions'."
+  :type 'boolean
+  :group 'braille)
+
 (defconst braille-base #x2800 "Start of unicode braille block")
 (defconst braille-nrows 4 "Number of rows in the braille grid")
 (defconst braille-ncols 2 "Number of columns in the braille grid")
+
+(defun braille-inhibit-modification-hooks-p ()
+  "Return value `inhibit-modification-hooks' should be set to while drawing."
+  (if braille-inhibit-modification-hooks t inhibit-modification-hooks))
 
 (defun braille-empty-char ()
   "Return the character used for empty canvas in braille.
@@ -307,7 +320,9 @@ E should be a mouse down event."
   (interactive "e")
   (undo-boundary)
   (track-mouse
-    (let (xy0 xy1)
+    (let (xy0
+          xy1
+          (inhibit-modification-hooks (braille-inhibit-modification-hooks-p)))
       (setq xy0 (posn-x-y (event-start e))) ; start xy
       (while (and (setq e (read-event)) (mouse-movement-p e)) ; drag
         (ignore))
@@ -322,7 +337,8 @@ If ERASE is t, erase instead."
   (undo-boundary)
   (let* ((posn (event-start e))
          (dot-xy-prev (braille-posn-to-dot-xy posn))
-         dot-xy-cur)
+         dot-xy-cur
+         (inhibit-modification-hooks (braille-inhibit-modification-hooks-p)))
     ;; (message "braille-mouse-draw posn: %s" posn)  ; debug
     (braille-insert-at-dot-xy dot-xy-prev erase) ; first click
     (track-mouse
