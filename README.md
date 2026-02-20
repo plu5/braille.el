@@ -53,6 +53,7 @@ Maybe:
   + separate canvases on the same buffer with a particular line above, then changing the view to each frame.
 - [ ] Selection : marking the start and end dot (teh dot of each corner)
 - [ ] Transformations (move, rotate, scale)
+- [ ] Text scale increase/decrease bindings (like zoom in/out)
 - [ ] Publish on MELPA
 - [ ] Record video/gif usage demo on emacs -Q
 - [ ] Publish on /r/emacs
