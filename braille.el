@@ -117,8 +117,8 @@ blank grid characters."
                new (braille-char-name-or-char (string-to-char new)) beg end))))
 
 (defun braille-colrow-from-posn (posn)
-    "Calculate col and row of appropriate braille point from posn.
-col = 0/1. row = 0/1/2/3."
+    "Calculate colrow of appropriate braille point given POSN.
+(col . row) where col = 0/1 and row = 0/1/2/3."
   (let* ((rel-xy (posn-object-x-y posn))
          (rel-wh (posn-object-width-height posn))
          (col (min (1- braille-ncols)
@@ -258,13 +258,13 @@ POSN is the return from `event-start' or `event-end'."
              (posn-x-y char-posn) char-posn posn)))
 
 (defun braille-dot-wh ()
-  "Calculate braille dot width and height"
+  "Return (width . height) in pixels of a braille dot."
   (let ((dot-w (/ (window-font-width) (float braille-ncols)))
         (dot-h (/ (window-font-height) (float braille-nrows))))
     (cons dot-w dot-h)))
 
 (defun braille-posn-to-dot-xy (posn)
-  "Convert posn to dotspace coordinates."
+  "Convert POSN to dotspace coordinates (dot-x . dot-y)."
   (let* ((xyn (braille-posn-char-xy posn)) ; top left
          (dot-wh (braille-dot-wh))
          (colrow (braille-colrow-from-posn posn))
@@ -273,7 +273,7 @@ POSN is the return from `event-start' or `event-end'."
     (cons dot-x dot-y)))
 
 (defun braille-insert-at-dot-xy (dot-xy &optional erase)
-  "Insert braille dot at dotspace (x . y)
+  "Insert braille dot at dotspace (dot-x . dot-y).
 If ERASE is t, erase instead."
   (let* ((dot-wh (braille-dot-wh))
          (xy (cons (floor (* (car dot-xy) (car dot-wh)))
@@ -281,9 +281,9 @@ If ERASE is t, erase instead."
     (braille-onto-xy xy erase)))
 
 (defun braille-dotspace-line (dot-xy0 dot-xy1 &optional erase)
-  "Draw a line of braille points from XY0 to XY1 in dotspace.
-XY0 and XY1 should each be a position in dotspace like (x . y)
-(dots from the left and dots from the top)
+  "Draw a line of braille points from DOT-XY0 to DOT-XY1 in dotspace.
+DOT-XY0 and DOT-XY1 should each be a position in dotspace like (dot-x . dot-y)
+(dots from the left and dots from the top).
 If ERASE is t, erase instead."
   (let* ((dot-wh (braille-dot-wh))
          (x0 (car dot-xy0))
