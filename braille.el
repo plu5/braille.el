@@ -38,11 +38,11 @@ Expected to be used in combination with `braille-use-blank-grid' t."
   :type 'boolean
   :group 'braille)
 
-(defcustom braille-default-canvas-size "50x20"
+(defcustom braille-default-canvas-size "0x0"
   "Canvas size in the format WxH to use as default dimensions.
 Used in `braille-create-canvas-at-point-without-asking' and in
 `braille-create-canvas-at-point' as the default value.
-The unit of W and H is number of characters."
+The unit of W and H is number of characters. 0 means auto."
   :type 'string
   :group 'braille)
 
@@ -77,19 +77,26 @@ Otherwise, return c as a string."
    ((eq c braille-base) "blank braille grid")
    (t (char-to-string c))))
 
+(defun braille-or0 (v default)
+  "Return V if V is nonzero, DEFAULT otherwise."
+  (if (and (numberp v) (zerop v))
+      default
+    v))
+
 (defun braille-create-canvas-at-point (size)
   "Create an area of whitespace with given dimensions."
   (interactive
    (list (split-string
-          (read-string "Canvas size: " braille-default-canvas-size) "x")))
+          (read-string "Canvas size (0=auto): " braille-default-canvas-size)
+          "x")))
   (unless (= (length size) 2)
-    (user-error "Expected canvas size format: WxH (ex. 40x10)"))
-  (let ((h (string-to-number (cadr size)))
-        (w (string-to-number (car size)))
+    (user-error "Expected canvas size format: WxH (ex. 50x20)"))
+  (let ((w (braille-or0 (string-to-number (car size)) (window-width)))
+        (h (braille-or0 (string-to-number (cadr size)) (window-height)))
         (c (braille-empty-char)))
     (dotimes (i h)
       (insert (make-string w c) "\n"))
-    (message "Created %s canvas with %s character" size
+    (message "Created %sx%s canvas with %s character" w h
              (braille-char-name-or-char c))))
 
 (defun braille-create-canvas-at-point-unprompted ()
