@@ -1,8 +1,10 @@
 ;;; braille.el -- Braille drawing minor mode  -*- lexical-binding: t; -*-
+
 ;; 2026-02-10 07:04
 ;; Author: plu5
 ;; Keywords: mouse
 ;; URL: https://github.com/plu5/braille.el
+
 ;; This file is not part of GNU Emacs.
 
 ;;; Commentary:
@@ -356,10 +358,6 @@ E should be a mouse down event."
   (interactive "e")
   (braille-e-stroke e t))
 
-;; temp debug
-;; (global-set-key [mouse-8] #'braille-e-debug)
-;; (global-set-key [down-mouse-1] #'braille-e-line)
-
 (define-minor-mode braille-mode
   "Toggles global braille-mode.
 Minor mode for drawing with braille dots."
@@ -377,5 +375,12 @@ Minor mode for drawing with braille dots."
     ([(control ?c) (control ?v)] . braille-create-canvas-at-point-unprompted)))
 
 (provide 'braille)
+
+;;; Debug bindings:
+;; (global-set-key [mouse-8] #'braille-e-debug)
+;; (global-set-key [down-mouse-1] #'braille-e-line)
+
+;;; Demo:
+;; (progn (eval-buffer) (braille-mode))
 
 ;;; braille.el ends here
