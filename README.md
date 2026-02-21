@@ -1,6 +1,8 @@
-# braille.el
+# braille.el ⣿
 Emacs minor mode for drawing with braille characters
 using a mouse or drawing tablet.
+
+![braille el demo on emacs Q](demo.gif)
 
 braille.el can draw on any character, but by default, for convenience, it will avoid drawing on any character that is not a braille character or space. This can be customised with `braille-consider-text-out-of-bounds`.
 
@@ -56,6 +58,7 @@ Maybe:
 - [ ] Text scale increase/decrease bindings (like zoom in/out)
 - [ ] Publish on MELPA
 - [ ] Record video/gif usage demo on emacs -Q
+  + I mean a cool one with cool drawings, showing what it's like with a custom font, animation
 - [ ] Publish on /r/emacs
   + "braille.el : Minor mode for drawing with Braille anywhere"
   + Ask people to share what they made with it. Maybe there are some artists that would want to test it out and share what they made.
