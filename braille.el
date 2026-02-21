@@ -353,7 +353,7 @@ If ERASE is t, erase instead."
   "Erase braille while mouse is dragged, stopping when it is let go.
 E should be a mouse down event."
   (interactive "e")
-  (braille-mouse-draw e t))
+  (braille-e-stroke e t))
 
 ;; temp debug
 ;; (global-set-key [mouse-8] #'braille-e-debug)
