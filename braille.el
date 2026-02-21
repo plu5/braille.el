@@ -368,9 +368,10 @@ Minor mode for drawing with braille dots."
     ([mouse-1] . ignore)
     ([C-down-mouse-1] . braille-e-stroke-erase)
     ([C-mouse-1] . ignore)
-    ([M-mouse-1] . undo)
+    ([M-mouse-1] . undo-only)
     ([M-down-mouse-1] . ignore)
-    ([M-S-mouse-1] . redo)
+    ([M-drag-mouse-1] . ignore)
+    ([M-S-mouse-1] . undo-redo)
     ([(control ?c) ?v] . braille-create-canvas-at-point)
     ([(control ?c) (control ?v)] . braille-create-canvas-at-point-unprompted)))
 

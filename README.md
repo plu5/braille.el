@@ -18,8 +18,8 @@ braille.el uses by default normal space characters for its canvas. It has the op
 |-------------------------|------|----------|
 | <kbd>down-mouse-1</kbd> | Draw | `braille-e-stroke` |
 | <kbd>C-down-mouse-1</kbd> | Erase | `braille-e-stroke-erase` |
-| <kbd>M-mouse-1</kbd>    | Undo a stroke | `undo` |
-| <kbd>M-S-mouse-1</kbd>  | Redo a stroke | `redo` |
+| <kbd>M-mouse-1</kbd>    | Undo a stroke | `undo-only` |
+| <kbd>M-S-mouse-1</kbd>  | Redo a stroke | `undo-redo` |
 | <kbd>C-c v</kbd>        | Create canvas prompting for size | `braille-create-canvas-at-point` |
 | <kbd>C-c C-v</kbd>      | Create canvas with default size | `braille-create-canvas-at-point-unprompted` |
 
