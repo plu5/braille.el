@@ -159,7 +159,8 @@ COLROW is (col . row) for the dot position in the 2x4 braille grid, 0-based."
         (rel-wh (posn-object-width-height posn)))
     ;; (message "bounds calc %s %s %s" click-xy char-xy rel-wh)  ; debug
     (and (<= (car click-xy) (+ (car char-xy) (car rel-wh)))
-         (<= (cdr click-xy) (+ (cdr char-xy) (cdr rel-wh))))))
+         (<= (cdr click-xy) (+ (cdr char-xy) (cdr rel-wh)))
+         (< (posn-point posn) (point-max)))))
 
 (defun braille-e-debug (e)
   "Show information about the input position for debugging purposes.
