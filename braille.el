@@ -55,9 +55,49 @@ handling of the active region per `select-active-regions'."
   :type 'boolean
   :group 'braille)
 
+(defcustom braille-pointer x-pointer-crosshair
+  "Mouse pointer in `braille-mode'.
+`braille-mode' sets `x-pointer-shape' to this value when activated, and
+back to what it was set to before when deactivated. For possible values
+see `x-pointer-*' variables like `x-pointer-arrow',
+`x-pointer-crosshair', `x-pointer-dot', `x-pointer-circle'. Set this to
+nil to not change the pointer."
+  :type 'natnum
+  :group 'braille)
+
+(defcustom braille-mouse-color "red"
+  "Color to give `set-mouse-color'.
+It is used to make `x-pointer-shape' update without having to create a
+new frame. This only changes the color with some pointer shapes."
+  :type 'string
+  :group 'braille)
+
+(defvar braille-prev-pointer nil
+  "Storage for previous value of `x-pointer-shape'.")
+(defvar braille-prev-mouse-color nil
+  "Storage for previous value of mouse color in `frame-parameters'.")
+
 (defconst braille-base #x2800 "Start of unicode braille block")
 (defconst braille-nrows 4 "Number of rows in the braille grid")
 (defconst braille-ncols 2 "Number of columns in the braille grid")
+
+(defun braille-set-pointer ()
+  "Set `x-pointer-shape' to `braille-pointer', saving its previous value.
+Mouse color is changed as well because it's required for it to update."
+  (setq braille-prev-pointer x-pointer-shape)
+  (setq x-pointer-shape braille-pointer)
+  (setq braille-prev-mouse-color (frame-parameter nil 'mouse-color))
+  (set-mouse-color braille-mouse-color))
+
+(defun braille-reset-pointer ()
+  "Reset `x-pointer-shape' and mouse color.
+Using `braille-prev-pointer' and `braille-prev-mouse-color'."
+  (when braille-prev-pointer
+    (setq x-pointer-shape braille-prev-pointer)
+    (setq braille-prev-pointer nil))
+  (when braille-prev-mouse-color
+    (set-mouse-color braille-prev-mouse-color)
+    (setq braille-prev-mouse-color nil)))
 
 (defun braille-inhibit-modification-hooks-p ()
   "Return value `inhibit-modification-hooks' should be set to while drawing."
@@ -380,7 +420,10 @@ Minor mode for drawing with braille dots."
     ([M-drag-mouse-1] . ignore)
     ([M-S-mouse-1] . undo-redo)
     ([(control ?c) ?v] . braille-create-canvas-at-point)
-    ([(control ?c) (control ?v)] . braille-create-canvas-at-point-unprompted)))
+    ([(control ?c) (control ?v)] . braille-create-canvas-at-point-unprompted))
+  (if braille-mode
+      (if braille-pointer (braille-set-pointer))
+    (if braille-prev-pointer (braille-reset-pointer))))
 
 (provide 'braille)
 
