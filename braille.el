@@ -92,12 +92,13 @@ Mouse color is changed as well because it's required for it to update."
 (defun braille-reset-pointer ()
   "Reset `x-pointer-shape' and mouse color.
 Using `braille-prev-pointer' and `braille-prev-mouse-color'."
-  (when braille-prev-pointer
-    (setq x-pointer-shape braille-prev-pointer)
-    (setq braille-prev-pointer nil))
-  (when braille-prev-mouse-color
-    (set-mouse-color braille-prev-mouse-color)
-    (setq braille-prev-mouse-color nil)))
+  (setq x-pointer-shape braille-prev-pointer) ; nil is a valid value
+  (setq braille-prev-pointer nil)
+  ;; we have to always set it, even if it's nil, as otherwise the
+  ;; pointer will not update. but even on emacs -Q it's not nil, it's
+  ;; "black"
+  (set-mouse-color braille-prev-mouse-color)
+  (setq braille-prev-mouse-color nil))
 
 (defun braille-inhibit-modification-hooks-p ()
   "Return value `inhibit-modification-hooks' should be set to while drawing."
@@ -427,13 +428,17 @@ Minor mode for drawing with braille dots."
     ([(control ?c) (control ?v)] . braille-create-canvas-at-point-unprompted))
   (if braille-mode
       (if braille-pointer (braille-set-pointer))
-    (if braille-prev-pointer (braille-reset-pointer))))
+    (if braille-pointer (braille-reset-pointer))))
 
 (provide 'braille)
 
 ;;; Debug bindings:
 ;; (global-set-key [mouse-8] #'braille-e-debug)
 ;; (global-set-key [down-mouse-1] #'braille-e-line)
+
+;; (braille-mode 'toggle)
+;; braille-prev-pointer
+;; braille-prev-mouse-color
 
 ;;; Demo:
 ;; (progn (eval-buffer) (braille-mode))
