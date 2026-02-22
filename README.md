@@ -66,6 +66,9 @@ These are things that I'm not sure if I want to fix because it would be complica
   + This is due to dependence on pixel positions. Does terminal have a way to tell where relative to the character a click has occurred? If not, then it's impossible to make braille.el work in terminal.
 - Changing pointer only affects the current frame
   + Associated issue: If the user turns braille-mode on on one frame and turns it off on another it will not reset on the first
+- Automatic canvas size calculation doesn't take account of text scale
+  + If your text scale is negative, the automatic canvas will be too small, and if it's positive it will too large -- and it's this last one which could be a big issue if there are a lot of people who use Emacs with a permanently large text scale rather than changing font size directly + use word wrap, as their canvases will be broken if they use automatic calculation for the size (which is currently the default).
+  + Being able to do just `(window-width)` and `(window-height)` for the calculation is so elegant and convenient that I am hesitant to fix this.
 
 ## Roadmap
 Implemented:
