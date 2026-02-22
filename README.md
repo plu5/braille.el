@@ -59,6 +59,14 @@ For a list of all customisable variables, see <kbd>M-x</kbd> `customise-group` <
   (setq braille-consider-space-out-of-bounds t))
 ```
 
+## Known issues
+These are things that I'm not sure if I want to fix because it would be complicated (a lot more code) and I'm not sure if it is needed. If you would like them to be fixed, please let me know.
+
+- Doesn't work in terminal Emacs (emacs -nw)
+  + This is due to dependence on pixel positions. Does terminal have a way to tell where relative to the character a click has occurred? If not, then it's impossible to make braille.el work in terminal.
+- Changing pointer only affects the current frame
+  + Associated issue: If the user turns braille-mode on on one frame and turns it off on another it will not reset on the first
+
 ## Roadmap
 Implemented:
 - [x] Add dot to braille character grid according to where in the character the click occurred
@@ -78,8 +86,6 @@ Implemented:
 TBD:
 - [ ] fix: sometimes drag-mouse-1 selects still
 - [ ] fix: emacs treating down-mouse-1 as a prefix if we hold it for a long time
-- [ ] fix: pointer shape sometimes not changing back?
-  + one thing is i think it only affects the current frame so if the user turns braille-mode on on one frame and turns it off on another it will not have reset
 - [ ] Shift left mouse drag adjust brush size (and message what it's set to)
 - [ ] down-mouse-1 `braille-e-modal-stroke` which will choose whether to do `braille-e-stroke` or `braille-e-line` or other functions in future for other shapes based on current draw mode
   + <kbd>C-c q</kbd> to normal, w to line, e to rectangle, r to ellipse, kind of like 3d applications select/translate/scale/rotate bindings. We already have normal drawing and line, so firwst implement the functionality to change between forms to be able to change between these two, then I could add rectangle and ellipse.
