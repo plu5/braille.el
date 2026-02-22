@@ -107,11 +107,12 @@ Maybe:
 - [ ] Selection : marking the start and end dot (teh dot of each corner)
 - [ ] Transformations (move, rotate, scale)
 - [ ] Text scale increase/decrease bindings (like zoom in/out)
+- [ ] Some kind of visual feedback when it "registers"? i.e. when there is a mouse click or movement event. currently suffering from lack of mouse events when making very precise short motions. if it cannot be overcome in another way (which I sadly think it can't as we can only work with the mouse events emacs gives us), feedback could at least help the user know when their stroke was not registered and train them to make ones that will register. currently what happens often is I try to make the stroke several times moving the pointer out of the way to see if it was registered until it does, which is really annoying and timewasting.
 - [ ] Publish on MELPA
-- [ ] Record video/gif usage demo on emacs -Q
-  + I mean a cool one with cool drawings, showing what it's like with a custom font, animation
+- [ ] Record video/gif usage demo
+  + cool drawings, showing what it's like with a custom font, animation
 - [ ] Publish on /r/emacs
-  + "braille.el : Minor mode for drawing with Braille anywhere"
+  + "Minor mode for making drawings and animations with braille"
   + Ask people to share what they made with it. Maybe there are some artists that would want to test it out and share what they made.
 
 ## Resources used
