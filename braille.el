@@ -76,6 +76,8 @@ new frame. This only changes the color with some pointer shapes."
   "Storage for previous value of `x-pointer-shape'.")
 (defvar braille-prev-mouse-color nil
   "Storage for previous value of mouse color in `frame-parameters'.")
+(defvar braille-needs-to-reset-pointer-flag nil
+  "Whether the pointer had been changed by braille.el and not yet reset.")
 
 (defconst braille-base #x2800 "Start of unicode braille block")
 (defconst braille-nrows 4 "Number of rows in the braille grid")
@@ -86,6 +88,7 @@ new frame. This only changes the color with some pointer shapes."
 Mouse color is changed as well because it's required for it to update."
   (setq braille-prev-pointer x-pointer-shape)
   (setq x-pointer-shape braille-pointer)
+  (setq braille-needs-to-reset-pointer-flag t)
   (setq braille-prev-mouse-color (frame-parameter nil 'mouse-color))
   (set-mouse-color braille-mouse-color))
 
@@ -94,6 +97,7 @@ Mouse color is changed as well because it's required for it to update."
 Using `braille-prev-pointer' and `braille-prev-mouse-color'."
   (setq x-pointer-shape braille-prev-pointer) ; nil is a valid value
   (setq braille-prev-pointer nil)
+  (setq braille-needs-to-reset-pointer-flag nil)
   ;; we have to always set it, even if it's nil, as otherwise the
   ;; pointer will not update. but even on emacs -Q it's not nil, it's
   ;; "black"
@@ -428,7 +432,7 @@ Minor mode for drawing with braille dots."
     ([(control ?c) (control ?v)] . braille-create-canvas-at-point-unprompted))
   (if braille-mode
       (if braille-pointer (braille-set-pointer))
-    (if braille-pointer (braille-reset-pointer))))
+    (if braille-needs-to-reset-pointer-flag (braille-reset-pointer))))
 
 (provide 'braille)
 
