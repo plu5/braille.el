@@ -23,6 +23,42 @@ braille.el uses by default normal space characters for its canvas. It has the op
 | <kbd>C-c v</kbd>        | Create canvas prompting for size | `braille-create-canvas-at-point` |
 | <kbd>C-c C-v</kbd>      | Create canvas with default size | `braille-create-canvas-at-point-unprompted` |
 
+### Customisation
+For a list of all customisable variables, see <kbd>M-x</kbd> `customise-group` <kbd>RET</kbd> `braille` <kbd>RET</kbd>
+#### Vanilla
+``` elisp
+(eval-after-load "braille"
+  '(progn
+     ;; unbind canvas creation shortcuts
+     (define-key braille-mode-map "\C-c\C-v" nil)
+     (define-key braille-mode-map "\C-cv" nil)
+     ;; bind C-c . v
+     (define-key braille-mode-map "\C-c.v" 'braille-create-canvas-at-point)
+     ;; set default canvas size
+     (setq braille-default-canvas-size "50x20")
+     ;; use blank grid character instead of space for spacing
+     (setq braille-use-blank-grid t)
+     (setq braille-consider-space-out-of-bounds t)))
+```
+#### use-package
+``` elisp
+(use-package braille
+  :ensure nil                          ; because it's not on melpa yet
+  :bind
+  (:map braille-mode-map
+        ;; unbind canvas creation shortcuts
+        ("C-c C-v" . nil)
+        ("C-c v" . nil)
+        ;; bind C-c . v
+        ("C-c . v" . braille-create-canvas-at-point))
+  :config
+  ;; set default canvas size
+  (setq braille-default-canvas-size "50x20")
+  ;; use blank grid character instead of space for spacing
+  (setq braille-use-blank-grid t)
+  (setq braille-consider-space-out-of-bounds t))
+```
+
 ## Roadmap
 Implemented:
 - [x] Add dot to braille character grid according to where in the character the click occurred
@@ -40,6 +76,9 @@ Implemented:
 - [x] <kbd>C-c v</kbd> create canvas prompting for size. <kbd>C-c C-v</kbd> create canvas with default size, and make the default adjustable (defcustom) (and message the size of the canvas created)
 
 TBD:
+- [ ] fix: sometimes drag-mouse-1 selects still
+- [ ] fix: emacs treating down-mouse-1 as a prefix if we hold it for a long time
+- [ ] fix: pointer shape rarely not changing back?
 - [ ] Shift left mouse drag adjust brush size (and message what it's set to)
 - [ ] down-mouse-1 `braille-e-modal-stroke` which will choose whether to do `braille-e-stroke` or `braille-e-line` or other functions in future for other shapes based on current draw mode
   + <kbd>C-c q</kbd> to normal, w to line, e to rectangle, r to ellipse, kind of like 3d applications select/translate/scale/rotate bindings. We already have normal drawing and line, so firwst implement the functionality to change between forms to be able to change between these two, then I could add rectangle and ellipse.
