@@ -66,6 +66,7 @@ These are things that I'm not sure if I want to fix because it would be complica
   + This is due to dependence on pixel positions. Does terminal have a way to tell where relative to the character a click has occurred? If not, then it's impossible to make braille.el work in terminal.
 - Changing pointer only affects the current frame
   + Associated issue: If the user turns braille-mode on on one frame and turns it off on another it will not reset on the first
+  + affect default-frame-alist? (cf [graywolf 2022](https://emacs.stackexchange.com/questions/3183/how-to-change-the-mouse-pointer-colour#comment121483_3185))
 - Automatic canvas size calculation doesn't take account of text scale
   + If your text scale is negative, the automatic canvas will be too small, and if it's positive it will too large -- and it's this last one which could be a big issue if there are a lot of people who use Emacs with a permanently large text scale rather than changing font size directly + use word wrap, as their canvases will be broken if they use automatic calculation for the size (which is currently the default).
   + Being able to do just `(window-width)` and `(window-height)` for the calculation is so elegant and convenient that I am hesitant to fix this.
@@ -87,6 +88,9 @@ Implemented:
 - [x] <kbd>C-c v</kbd> create canvas prompting for size. <kbd>C-c C-v</kbd> create canvas with default size, and make the default adjustable (defcustom) (and message the size of the canvas created)
 
 TBD:
+- [ ] fix: changing pointer for other platforms as I think `x-pointer-shape` is only for Xserver?
+  + check what happens on other platforms
+  + [Pointer Shape (GNU Emacs Lisp Reference Manual)](https://www.gnu.org/software/emacs/manual/html_node/elisp/Pointer-Shape.html)
 - [ ] fix: sometimes drag-mouse-1 selects still
 - [ ] fix: emacs treating down-mouse-1 as a prefix if we hold it for a long time
 - [ ] Shift left mouse drag adjust brush size (and message what it's set to)
